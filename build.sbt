@@ -9,7 +9,7 @@ jarName in assembly := "rest_recomend.jar"
 
 test in assembly := {}
 
-mainClass in assembly := Some("com.xiaomishu.recomend.boot.Boot")
+mainClass in assembly := Some("com.soledede.recomend.boot.Boot")
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
 {
@@ -24,7 +24,7 @@ name := "rest_recomend"
 
 version := "1.0"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.4"
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
@@ -38,14 +38,14 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.1.4",
   "com.typesafe.akka" %% "akka-slf4j" % "2.1.4",
   "ch.qos.logback" % "logback-classic" % "1.0.13",
-  "org.apache.hbase" % "hbase-client" % "0.98.1-cdh5.1.2",
-  ("org.apache.hbase" % "hbase-common" % "0.98.1-cdh5.1.2").
+  "org.apache.hbase" % "hbase-client" % "1.0.0-cdh5.4.7",
+  ("org.apache.hbase" % "hbase-common" % "1.0.0-cdh5.4.7").
     exclude("commons-collections", "commons-collections"),
-  ("org.apache.hadoop" % "hadoop-common" % "2.3.0-cdh5.1.2").
+  ("org.apache.hadoop" % "hadoop-common" % "2.6.0-cdh5.4.7").
     exclude("commons-beanutils", "commons-beanutils").
     exclude("commons-beanutils", "commons-beanutils-core").
     exclude("org.slf4j", "slf4j-log4j12"),
-  ("org.apache.hbase" % "hbase-server" % "0.98.1-cdh5.1.2").
+  ("org.apache.hbase" % "hbase-server" % "1.0.0-cdh5.4.7").
     exclude("org.mortbay.jetty", "servlet-api-2.5").
     exclude("commons-collections", "commons-collections").
     exclude("org.mortbay.jetty", "jsp-2.1").

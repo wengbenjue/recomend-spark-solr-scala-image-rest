@@ -1,22 +1,22 @@
-package com.xiaomishu.recomend.util
+package com.soledede.recomend.util
 
 /**
  * Created by wengbenjue on 2014/9/15.
  */
 
-import java.io.{ObjectInputStream, ByteArrayInputStream}
+import java.io.{ByteArrayInputStream, ObjectInputStream}
 
-import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.client.{Put, Result, Get, HTable}
+import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.hadoop.hbase.client.{Put, Get, HTable}
 import org.apache.hadoop.hbase.util.Bytes
-import scala.collection.mutable
+
 import scala.util.parsing.json.JSONArray
 
 
 object HbaseTool {
 
-  val table = new mutable.HashMap[String,HTable]()
+  val table = new scala.collection.mutable.HashMap[String,HTable]()
   var conf = HBaseConfiguration.create()
 
   def setConf(c:Configuration)={

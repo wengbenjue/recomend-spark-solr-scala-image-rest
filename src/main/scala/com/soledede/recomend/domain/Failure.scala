@@ -1,4 +1,4 @@
-package com.xiaomishu.recomend.domain
+package com.soledede.recomend.domain
 
 import spray.http.{StatusCodes, StatusCode}
 

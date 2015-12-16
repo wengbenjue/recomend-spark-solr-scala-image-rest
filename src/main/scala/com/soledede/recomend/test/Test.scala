@@ -1,6 +1,4 @@
-package com.xiaomishu.recomend.test
-
-import com.sysgears.recomend.dao.ModuleDAO
+package com.soledede.recomend.test
 
 /**
  * Created by wengbenjue on 2014/9/15.
