@@ -28,6 +28,8 @@ class SolJSolrCloudClient private extends SolrClient {
     response
   }
 
+
+
   override def close(): Unit = {
     SolJSolrCloudClient.close()
   }

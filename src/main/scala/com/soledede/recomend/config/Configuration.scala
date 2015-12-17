@@ -23,7 +23,7 @@ trait Configuration {
 
   //solr
   lazy val zkHostString = Try(config.getString("solrj.zk")).getOrElse("solr1:3213,solr2:3213,solr3:3213/solr")
-  lazy val collection = Try(config.getString("solrj.collection")).getOrElse("searchcloud")
+  lazy val collection = Try(config.getString("solrj.collection")).getOrElse("solritemcf")
   lazy val zkConnectTimeout = Try(config.getInt("solrj.zkConnectTimeout")).getOrElse(60000)
   lazy val zkClientTimeout = Try(config.getInt("solrj.zkClientTimeout")).getOrElse(60000)
 }

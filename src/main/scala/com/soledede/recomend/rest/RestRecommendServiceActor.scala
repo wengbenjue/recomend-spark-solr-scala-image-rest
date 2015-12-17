@@ -2,11 +2,12 @@ package com.soledede.recomend.rest
 
 import akka.actor.Actor
 import akka.event.slf4j.SLF4JLogging
-import com.soledede.recomend.dao.ModuleDAO
+import com.soledede.recomend.dao.HbaseRecommendModel
 import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.Date
 import com.soledede.recomend.entity.Msg
+import com.soledede.recomend.ui.RecommendUI
 import net.liftweb.json.Serialization._
 import net.liftweb.json.{DateFormat, Formats}
 import scala.Some
@@ -34,7 +35,9 @@ class RestRecommendServiceActor extends Actor with RestService {
 trait RestService extends HttpService with SLF4JLogging {
 
 
-  val resModuleService = new ModuleDAO()
+  val resModuleService = HbaseRecommendModel()
+
+  val defaultRecommendUI = RecommendUI()
 
   implicit val executionContext = actorRefFactory.dispatcher
 
@@ -91,16 +94,12 @@ trait RestService extends HttpService with SLF4JLogging {
             }
         }
     }~
-    path("rest" / Segment /Segment) {
-      (userId,cityId) =>
+    path("recommend" / Segment /IntNumber) {
+      (userId,number) =>
         get {
           ctx: RequestContext =>
             handleRequest(ctx) {
-              // log.debug("Retrieving customer with id %d".format(userId))
-              println("userId"+userId)
-              println("cityId"+cityId)
-              Right(Msg("测试"))
-              //resModuleService.get(userId.toString)
+              Right(defaultRecommendUI.recommendByUserId(userId,number))
             }
         }
     }

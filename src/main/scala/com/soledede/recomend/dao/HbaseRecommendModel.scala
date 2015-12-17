@@ -13,11 +13,18 @@ import scala.util.parsing.json.JSONArray
 /**
   * Provides DAL for Customer entities for MySQL database.
   */
-object ModuleDAO {
+object HbaseRecommendModel {
   private var hb = HbaseTool
+  var hbm: HbaseRecommendModel = null
+
+  def apply() = {
+    if (hbm == null) hbm = new HbaseRecommendModel()
+    hbm
+  }
+
 }
 
-class ModuleDAO extends Configuration {
+class HbaseRecommendModel private extends Configuration {
 
   {
     //lond the config of Hbase，create Table recomend
@@ -27,11 +34,12 @@ class ModuleDAO extends Configuration {
     confHbase.set("hbase.master", "spark1.soledede.com:60000")
     confHbase.addResource("/opt/cloudera/parcels/CDH/lib/hbase/conf/hbase-site.xml")
     confHbase.set(TableInputFormat.INPUT_TABLE, "recomend")
-    ModuleDAO.hb.setConf(confHbase)
+    HbaseRecommendModel.hb.setConf(confHbase)
   }
 
   protected def exError(e: Exception) =
     Failure("%d: %s".format(-1, e.getMessage), FailureType.DatabaseFailure)
+
   /**
     *
     * @param id
@@ -40,8 +48,8 @@ class ModuleDAO extends Configuration {
   def get(id: String): Either[Failure, JSONArray] = {
     try {
       println("Match==================" + id)
-      val list = ModuleDAO.hb.getSingleValue("recomend", id, "top", "resid").list
-      var resIdList = for (resNum <- list; if (resNum != null)) yield ModuleDAO.hb.getMapSingleValue("mapping", resNum.toString, "res", "resid")
+      val list = HbaseRecommendModel.hb.getSingleValue("recomend", id, "top", "resid").list
+      var resIdList = for (resNum <- list; if (resNum != null)) yield HbaseRecommendModel.hb.getMapSingleValue("mapping", resNum.toString, "res", "resid")
       resIdList = resIdList.filter(resid => resid != null)
       //ModuleDAO.hb.getMapSingleValue("mapping",id,"res","userid")
       //list.foreach(println)

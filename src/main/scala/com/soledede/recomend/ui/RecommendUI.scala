@@ -7,10 +7,18 @@ import com.soledede.recomend.entity.User
   */
 trait RecommendUI {
 
-  def recommendByUser(user: User): Seq[String] = null
+  def recommendByUser(user: User,number:Int): Seq[String] = null
 
-  def recommendByUserId(userId: Int): Seq[String] = null
+  def recommendByUserId(userId: String,number:Int): Seq[String] = null
 
-  def recommendByCatagoryByUser(user: User): Seq[String] = null
+  def recommendByCatagoryByUser(user: User,number:Int): Seq[String] = null
 
+}
+
+object RecommendUI{
+  def apply(rType: String = "default"): RecommendUI = {
+    rType match {
+      case "default" => GeneralRecommendUIImpl()
+    }
+  }
 }
