@@ -1,5 +1,6 @@
 package com.soledede.recomend.ui
 
+import com.soledede.recomend.entity.RecommendResult
 import com.soledede.recomend.service.RecommendService
 
 /**
@@ -10,7 +11,7 @@ class GeneralRecommendUIImpl extends RecommendUI {
   val solrRecommendService = RecommendService()
 
 
-  override def recommendByUserId(userId: String, number: Int): Seq[String] = {
+  override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
     solrRecommendService.recommendByUserId(userId, number)
   }
 }

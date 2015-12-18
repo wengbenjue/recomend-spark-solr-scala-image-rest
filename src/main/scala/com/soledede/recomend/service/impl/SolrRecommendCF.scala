@@ -1,6 +1,7 @@
 package com.soledede.recomend.service.impl
 
 
+import com.soledede.recomend.clock.{Timing, SystemTimerClock}
 import com.soledede.recomend.entity.RecommendResult
 import com.soledede.recomend.service.RecommendService
 import com.soledede.recomend.solr.SolrClient
@@ -9,7 +10,6 @@ import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.{SolrDocumentList}
 import org.apache.solr.common.util.SimpleOrderedMap
 import scala.collection.JavaConversions._
-import scala.collection.mutable
 import scala.util.control.Breaks._
 
 /**
@@ -17,6 +17,27 @@ import scala.util.control.Breaks._
   */
 class SolrRecommendCF private extends RecommendService {
   val solrClient = SolrClient()
+
+  val period = 1000 * 60 * 60 * 18
+  //val period = 3000
+  val timer = new Timing(new SystemTimerClock(), period, asyncTopN2Cache, "asyncTop2CACHE")
+  timer.start()
+
+
+  private def asyncTopN2Cache(): Unit = {
+    val fq = "status:99"
+    var jsonFacet = "{categories:{type:terms,field:docId,limit:80,sort:{weights:desc},facet:{weights:\"sum(weight)\"}}}"
+    jsonFacet = jsonFacet.replaceAll(":", "\\:")
+    val topNItems = groupBucket(null, fq, jsonFacet)
+    val recommendResult = topNItems.map { kv =>
+      val docId = kv.get("val").toString.trim
+      val weight = kv.get("weights").asInstanceOf[Double]
+      RecommendResult(docId, weight)
+    }
+    SolrRecommendCF.lock.synchronized {
+      SolrRecommendCF.topNItemsList = recommendResult
+    }
+  }
 
   //find the history list of current user
   private def searchDocsWeightByUserId(userId: String): SolrDocumentList = {
@@ -73,7 +94,7 @@ class SolrRecommendCF private extends RecommendService {
     }
     query ++= ")"
     val q = query.toString()
-    val fq = "-userId:" + userId
+    val fq = "-userId:" + userId + " AND status:99"
     var jsonFacet = "{categories:{type:terms,field:docId,limit:" + recomendNum + ",sort:{weights:desc},facet:{weights:\"sum(weight)\"}}}"
     jsonFacet = jsonFacet.replaceAll(":", "\\:")
     groupBucket(q, fq, jsonFacet)
@@ -81,14 +102,23 @@ class SolrRecommendCF private extends RecommendService {
 
   //recommend from popularity
   def recommendFromTopN(number: Int): Seq[RecommendResult] = {
-    //TODO
-    null
+    if (SolrRecommendCF.topNItemsList == null) {
+      SolrRecommendCF.lock.synchronized {
+        asyncTopN2Cache()
+        SolrRecommendCF.topNItemsList.take(number)
+      }
+    } else SolrRecommendCF.topNItemsList.take(number)
   }
 
   //recommend from popularity
   def topNPlusRecommend(recommendResult: scala.collection.mutable.Buffer[RecommendResult], number: Int): Seq[RecommendResult] = {
-
-    null
+    var result = recommendResult
+    if (SolrRecommendCF.topNItemsList == null) {
+      SolrRecommendCF.lock.synchronized {
+        result ++= SolrRecommendCF.topNItemsList.take(number)
+      }
+    } else result ++= SolrRecommendCF.topNItemsList.take(number)
+    result
   }
 
   //filter docs current user purchased
@@ -115,28 +145,51 @@ class SolrRecommendCF private extends RecommendService {
     }
     val rL = recommendResult.size
     if (rL < number) topNPlusRecommend(recommendResult, number - rL)
+    else if (rL > number) recommendResult.take(number)
     else recommendResult
   }
 
+  def putToCache(userId: String, number: Int, resultItem: Seq[RecommendResult]) = {
+
+  }
+
+  def getFromCache(userId: String, number: Int): scala.Seq[RecommendResult] = {
+    null
+  }
+
   override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
+    //get result from cache if there is result
+    val itemResult = getFromCache(userId: String, number: Int)
+    if (itemResult != null) return itemResult
     // search docs by userid
     val docWtList = searchDocsWeightByUserId(userId)
+    if (docWtList == null || docWtList.size() == 0) return recommendFromTopN(number) //recommend from popularity
     val dSize = docWtList.size()
-    if (docWtList == null || dSize == 0) return recommendFromTopN(number) //recommend from popularity
-
     //search k-neighbour of userid by docs that boosted
     val kNearstUsers = searchUserKNeighbourByDocsBoost(userId, docWtList)
-    if (kNearstUsers == null || kNearstUsers.size() == 0) return recommendFromTopN(number) //recommend from popularity
+    if (kNearstUsers == null || kNearstUsers.size() == 0) {
+      //put userid_number to cache
+      val resultItem = recommendFromTopN(number)
+      putToCache(userId, number, resultItem)
+      return resultItem //recommend from popularity
+    }
 
     // search recommend docs by users that boosted but not(docs that cuurent userid purchased)
     //search recommend docs by users that have boosted
     val recommendAllDocs = searchDocsByNearstUsers(kNearstUsers, userId, number + dSize)
-
-    if (recommendAllDocs == null || recommendAllDocs.size() == 0) return recommendFromTopN(number) //recommend from popularity
-    solrClient.close()
+    if (recommendAllDocs == null || recommendAllDocs.size() == 0) {
+      //put userid_number to cache
+      val resultItem = recommendFromTopN(number)
+      putToCache(userId, number, resultItem)
+      return resultItem //recommend from popularity
+    }
+    //solrClient.close()
 
     //filter docs current user purchased
-    filterRecommendFesultForUser(docWtList, recommendAllDocs, number)
+    val resultItem = filterRecommendFesultForUser(docWtList, recommendAllDocs, number)
+    //put userid_number to cache
+    putToCache(userId, number, resultItem)
+    resultItem
   }
 
 
@@ -252,6 +305,7 @@ class SolrRecommendCF private extends RecommendService {
 }
 
 object SolrRecommendCF {
+  val lock = new Object
   var solrCf: SolrRecommendCF = null
 
   def apply(): SolrRecommendCF = {
@@ -259,7 +313,13 @@ object SolrRecommendCF {
     solrCf
   }
 
+  var topNItemsList: Seq[RecommendResult] = null
+
   def main(args: Array[String]) {
-    new SolrRecommendCF().testSearchByQuery1()
+    //new SolrRecommendCF().asyncTopN2Cache()
+    new SolrRecommendCF()
+    Thread.sleep(6 * 1000)
+    topNItemsList
+    print("test")
   }
 }

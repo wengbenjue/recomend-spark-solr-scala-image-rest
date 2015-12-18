@@ -1,12 +1,13 @@
 package com.soledede.recomend.service
 
+import com.soledede.recomend.entity.RecommendResult
 import com.soledede.recomend.service.impl.SolrRecommendCF
 
 /**
   * Created by soledede on 2015/12/15.
   */
 trait RecommendService {
-  def recommendByUserId(userId: String,number: Int): Seq[String] = null
+  def recommendByUserId(userId: String,number: Int): Seq[RecommendResult] = null
 }
 
 object RecommendService {

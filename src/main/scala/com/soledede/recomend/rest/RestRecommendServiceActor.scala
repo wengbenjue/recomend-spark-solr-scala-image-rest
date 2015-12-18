@@ -16,8 +16,6 @@ import spray.httpx.unmarshalling._
 import spray.routing._
 
 
-
-
 /**
   *
   * REST Service actor.
@@ -89,20 +87,22 @@ trait RestService extends HttpService with SLF4JLogging {
               log.debug("test")
               log.info("haha")
               println("进来了!")
-              Right(Msg("zhong像素"))
+              Right(Msg("zhong像素", 0))
               //resModuleService.get(userId.toString)
             }
         }
-    }~
-    path("recommend" / Segment /IntNumber) {
-      (userId,number) =>
-        get {
-          ctx: RequestContext =>
-            handleRequest(ctx) {
-              Right(defaultRecommendUI.recommendByUserId(userId,number))
-            }
-        }
-    }
+    } ~
+      path("recommend" / Segment / IntNumber) {
+        (userId, number) =>
+          get {
+            ctx: RequestContext =>
+              handleRequest(ctx) {
+                if (number == null || number <= 0 || number > 80)
+                  Right(Msg("推荐数量必须大于0,并且不能超过80个", -1))
+                else Right(defaultRecommendUI.recommendByUserId(userId, number))
+              }
+          }
+      }
   }
 
   /**
