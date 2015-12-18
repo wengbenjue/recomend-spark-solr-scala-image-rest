@@ -26,4 +26,8 @@ trait Configuration {
   lazy val collection = Try(config.getString("solrj.collection")).getOrElse("solritemcf")
   lazy val zkConnectTimeout = Try(config.getInt("solrj.zkConnectTimeout")).getOrElse(60000)
   lazy val zkClientTimeout = Try(config.getInt("solrj.zkClientTimeout")).getOrElse(60000)
+
+  //redis
+  lazy val redisHost = Try(config.getString("redis.host")).getOrElse("localhost")
+  lazy val redisPort = Try(config.getInt("redis.port")).getOrElse(6379)
 }

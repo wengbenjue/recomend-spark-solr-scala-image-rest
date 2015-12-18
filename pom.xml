@@ -212,6 +212,42 @@
             <artifactId>guava</artifactId>
             <version>19.0-rc2</version>
         </dependency>
+
+
+        <!--redis-->
+        <!--https://github.com/etaty/rediscala-->
+        <!--http://dl.bintray.com/etaty/maven -->
+        <dependency>
+            <groupId>com.etaty.rediscala</groupId>
+            <artifactId>rediscala_${scala.binary.version}</artifactId>
+            <version>1.5.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>scala-library</artifactId>
+                    <groupId>org.scala-lang</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>akka-actor</artifactId>
+                    <groupId>com.typesafe.akka</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--<dependency>
+            <groupId>com.github.etaty</groupId>
+            <artifactId>rediscala</artifactId>
+            <version>1.5.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>scala-library</artifactId>
+                    <groupId>org.scala-lang</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>akka-actor</artifactId>
+                    <groupId>com.typesafe.akka</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
+
     </dependencies>
 
     <build>
@@ -375,6 +411,11 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>etaty</id>
+            <url>http://dl.bintray.com/etaty/maven</url>
+        </repository>
+
         <repository>
             <id>maven centeal repository</id>
             <url>http://mvnrepository.com/</url>
