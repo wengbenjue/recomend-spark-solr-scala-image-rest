@@ -9,7 +9,7 @@ import redis.ByteStringFormatter
   * Created by soledede on 2015/12/17.
   */
 case class RecommendResult(var item: String, var weight: Double) extends Serializable {
-  def this() = this(null, null)
+  def this() = this(null, -99999.9)
 }
 
 object RecommendResult {

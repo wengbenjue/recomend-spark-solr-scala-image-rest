@@ -5,6 +5,7 @@ import redis.{ByteStringDeserializer, ByteStringSerializer}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by soledede on 2015/12/18.
@@ -212,7 +213,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
       var r = null.asInstanceOf[Boolean]
       try {
         val result = redis.set(key, value)
-        Await.result(result, 10 seconds)
+        Await.result(result, 500 milliseconds)
         r = result.value.get.get
         log.debug("set (" + key + " -> " + value + ")")
       } catch {
@@ -228,11 +229,11 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
       var r = null.asInstanceOf[Boolean]
       try {
         val result = redis.set(key, value, Option(exSeconds))
-        Await.result(result, 10 seconds)
+        Await.result(result, 1 milliseconds)
         r = result.value.get.get
         log.debug("set (" + key + " -> " + value + ")")
       } catch {
-        case e: Exception => log.error("set key -> value failed！", e)
+        case e: Exception => log.error("set key -> value failed！", e.getMessage)
       }
       r
     }
@@ -242,11 +243,11 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     var r = null.asInstanceOf[Option[T]]
     try {
       val result = redis.get(key)
-      Await.result(result, 10 seconds)
+      Await.result(result, 15 milliseconds)
       r = result.value.get.get
       log.debug("get (" + key + " -> " + r + ")")
     } catch {
-      case e: Exception => log.error("get key -> value failed！", e)
+      case e: Exception => log.error("get key -> value failed！", e.getMessage)
     }
     r
   }

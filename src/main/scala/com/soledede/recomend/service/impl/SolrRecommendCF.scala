@@ -10,13 +10,19 @@ import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.common.{SolrDocumentList}
 import org.apache.solr.common.util.SimpleOrderedMap
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
+import com.soledede.recomend.cache.KVCache
 
 /**
   * Created by soledede on 2015/12/15.
   */
 class SolrRecommendCF private extends RecommendService {
   val solrClient = SolrClient()
+
+  val separator = "_$$_"
+
+  val cache = KVCache()
 
   val period = 1000 * 60 * 60 * 18
   //val period = 3000
@@ -150,17 +156,17 @@ class SolrRecommendCF private extends RecommendService {
   }
 
   def putToCache(userId: String, number: Int, resultItem: Seq[RecommendResult]) = {
-
+    cache.put(userId + separator + number, resultItem)
   }
 
   def getFromCache(userId: String, number: Int): scala.Seq[RecommendResult] = {
-    null
+    cache.get(userId + separator + number)
   }
 
   override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
     //get result from cache if there is result
     val itemResult = getFromCache(userId: String, number: Int)
-    if (itemResult != null) return itemResult
+    if (itemResult != null && itemResult.size>0) return itemResult
     // search docs by userid
     val docWtList = searchDocsWeightByUserId(userId)
     if (docWtList == null || docWtList.size() == 0) return recommendFromTopN(number) //recommend from popularity
@@ -317,9 +323,15 @@ object SolrRecommendCF {
 
   def main(args: Array[String]) {
     //new SolrRecommendCF().asyncTopN2Cache()
-    new SolrRecommendCF()
-    Thread.sleep(6 * 1000)
-    topNItemsList
-    print("test")
+    val solrCf = new SolrRecommendCF()
+    /*  Thread.sleep(6 * 1000)
+      topNItemsList
+      print("test")*/
+    val buffer = ListBuffer[RecommendResult]()
+    buffer += RecommendResult("item1", 23)
+    buffer += RecommendResult("item2", 24)
+    solrCf.cache.put("test123", buffer)
+    //Thread.sleep(9000)
+    println(solrCf.cache.get("test123"))
   }
 }
