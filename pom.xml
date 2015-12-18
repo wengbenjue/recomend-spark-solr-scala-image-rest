@@ -385,8 +385,86 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.soledede.recomend.boot.Boot</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>application.conf</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>logback.xml</resource>
+                                </transformer>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>executable</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
+           <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.soledede.recomend.boot.Boot</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!--mvn clean package-->
 
+            <!-- <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-assembly-plugin</artifactId>
+                 <version>2.4</version>
+                 <configuration>
+                     <appendAssemblyId>false</appendAssemblyId>
+                     <descriptors>
+                         <descriptor>src/main/assembly/assemblypackage.xml</descriptor>
+                     </descriptors>
+                     <descriptorRefs>
+                         <descriptorRef>jar-with-dependencies</descriptorRef>
+                     </descriptorRefs>
+                     <archive>
+                         <manifest>
+                             <mainClass>com.soledede.recomend.boot.Boot</mainClass>
+                         </manifest>
+                     </archive>
+                 </configuration>
+                 <executions>
+                     <execution>
+                         <id>make-assembly</id>
+                         <phase>package</phase>
+                         <goals>
+                             <goal>assembly</goal>
+                         </goals>
+                     </execution>
+                 </executions>
+             </plugin>-->
+            <!-- mvn clean assembly:assembly-->
         </plugins>
     </build>
 
