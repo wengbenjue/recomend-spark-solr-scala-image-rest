@@ -78,17 +78,14 @@ trait RestService extends HttpService with SLF4JLogging {
   val rest = respondWithMediaType(MediaTypes.`application/json`) {
     //"res" / Segment 匹配字符串
     //数字 LongNumber
-    path("recommend" / LongNumber) {
-      userId =>
+    path("recommend" / "catagory" / Segment) {
+      keyword =>
         get {
           ctx: RequestContext =>
             handleRequest(ctx) {
-              log.debug("Retrieving customer with id %d".format(userId))
-              log.debug("test")
-              log.info("haha")
-              println("进来了!")
-              Right(Msg("zhong像素", 0))
-              //resModuleService.get(userId.toString)
+              val catagory = defaultRecommendUI.recommendMostLikeCatagoryIdByKeywords(keyword)
+              if (catagory == null) Right(Msg("未能匹配到合适类目!", -1))
+              else Right(catagory)
             }
         }
     } ~

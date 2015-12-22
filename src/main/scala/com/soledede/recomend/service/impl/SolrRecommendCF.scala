@@ -166,7 +166,7 @@ class SolrRecommendCF private extends RecommendService {
   override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
     //get result from cache if there is result
     val itemResult = getFromCache(userId: String, number: Int)
-    if (itemResult != null && itemResult.size>0) return itemResult
+    if (itemResult != null && itemResult.size > 0) return itemResult
     // search docs by userid
     val docWtList = searchDocsWeightByUserId(userId)
     if (docWtList == null || docWtList.size() == 0) return recommendFromTopN(number) //recommend from popularity
@@ -287,26 +287,6 @@ class SolrRecommendCF private extends RecommendService {
     // r.getResults.foreach(println)
   }
 
-  private def escapeQueryChars(query: String): String = {
-    val sb = new StringBuilder()
-    for (i <- 0 to query.length() - 1) {
-      val c = query.charAt(i);
-      if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '('
-        || c == ')' || c == ':' || c == '^' || c == '[' || c == ']'
-        || c == '{' || c == '}' || c == '~'
-        || c == '*' || c == '?' || c == '|' || c == '&' || c == ';'
-        || c == '/') {
-        sb.append('\\')
-      }
-      sb.append(c)
-    }
-
-    var q = sb.toString();
-    q = q.replaceAll("“", "\"")
-    q = q.replaceAll("”", "\"")
-    q = q.toUpperCase()
-    q
-  }
 
 }
 

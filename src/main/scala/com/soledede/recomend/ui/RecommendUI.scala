@@ -13,6 +13,8 @@ trait RecommendUI {
 
   def recommendByCatagoryByUser(user: User,number:Int): Seq[String] = null
 
+  def recommendMostLikeCatagoryIdByKeywords(keyword: String): String
+
 }
 
 object RecommendUI{

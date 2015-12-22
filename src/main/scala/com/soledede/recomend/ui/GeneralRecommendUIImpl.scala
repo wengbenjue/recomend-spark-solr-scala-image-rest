@@ -8,12 +8,14 @@ import com.soledede.recomend.service.RecommendService
   */
 class GeneralRecommendUIImpl extends RecommendUI {
 
-  val solrRecommendService = RecommendService()
-
+  val solrRecommendCFService = RecommendService()
+  val solrRecommendCTService = RecommendService("solrCT")
 
   override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
-    solrRecommendService.recommendByUserId(userId, number)
+    solrRecommendCFService.recommendByUserId(userId, number)
   }
+
+  override def recommendMostLikeCatagoryIdByKeywords(keyword: String): String = solrRecommendCTService.recommendMostLikeCatagoryIdByKeywords(keyword)
 }
 
 object GeneralRecommendUIImpl {
