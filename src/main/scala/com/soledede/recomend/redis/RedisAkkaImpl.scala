@@ -48,7 +48,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     (rsObj, scores)
   }
 
-  def getLastFromSortedSet[T: ByteStringDeserializer](name: String): (T, Double) = {
+  override def getLastFromSortedSet[T: ByteStringDeserializer](name: String): (T, Double) = {
     var rsObj = null.asInstanceOf[T]
     var scores: Double = 0.0
     try {
@@ -127,7 +127,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     rsObj
   }
 
-  def popLastFromList[T: ByteStringDeserializer](key: String): T = {
+  override def popLastFromList[T: ByteStringDeserializer](key: String): T = {
     var rsObj = null.asInstanceOf[T]
     try {
       val r = for {
@@ -144,7 +144,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     rsObj
   }
 
-  def getCounterNextVal(key: String): Long = {
+  override def getCounterNextVal(key: String): Long = {
     this.synchronized {
       var r = -1L
       try {
@@ -158,7 +158,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     }
   }
 
-  def putKvHashMap[T: ByteStringSerializer](key: String, keysValues: Map[String, T]): Boolean = {
+  override def putKvHashMap[T: ByteStringSerializer](key: String, keysValues: Map[String, T]): Boolean = {
     this.synchronized {
       var r = false
       try {
@@ -172,7 +172,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     }
   }
 
-  def getKvHashMap(key: String, fields: Seq[String]): Seq[String] = {
+  override def getKvHashMap(key: String, fields: Seq[String]): Seq[String] = {
     var r = null.asInstanceOf[Seq[String]]
     try {
       val result = redis.hmget(key, fields: _*)
@@ -184,7 +184,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     r
   }
 
-  def getHashmapByKeyField[T: ByteStringDeserializer](key: String, fields: Seq[String]): Seq[Option[T]] = {
+  override def getHashmapByKeyField[T: ByteStringDeserializer](key: String, fields: Seq[String]): Seq[Option[T]] = {
     var r = null.asInstanceOf[Seq[Option[T]]]
     try {
       val result = redis.hmget(key, fields: _*)
@@ -196,7 +196,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     r
   }
 
-  def getHashmapByKeyField2[T: ByteStringDeserializer](key: String, fields: Seq[String]): Seq[Option[T]] = {
+   def getHashmapByKeyField2[T: ByteStringDeserializer](key: String, fields: Seq[String]): Seq[Option[T]] = {
     var r = null.asInstanceOf[Seq[Option[T]]]
     try {
       val result = redis.hmget(key, fields: _*)
@@ -208,7 +208,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     r
   }
 
-  def setValue[T: ByteStringSerializer](key: String, value: T): Boolean = {
+  override def setValue[T: ByteStringSerializer](key: String, value: T): Boolean = {
     this.synchronized {
       var r = null.asInstanceOf[Boolean]
       try {
@@ -224,7 +224,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
   }
 
   // redis command: SETEX key seconds value
-  def setValue[T: ByteStringSerializer](key: String, value: T, exSeconds: Long): Boolean = {
+  override def setValue[T: ByteStringSerializer](key: String, value: T, exSeconds: Long): Boolean = {
     this.synchronized {
       var r = null.asInstanceOf[Boolean]
       try {
@@ -239,7 +239,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     }
   }
 
-  def getValue[T: ByteStringDeserializer](key: String): Option[T] = {
+  override def getValue[T: ByteStringDeserializer](key: String): Option[T] = {
     var r = null.asInstanceOf[Option[T]]
     try {
       val result = redis.get(key)
@@ -252,7 +252,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     r
   }
 
-  def delKey(keys: Seq[String]): Long = {
+  override def delKey(keys: Seq[String]): Long = {
     this.synchronized {
       var r = null.asInstanceOf[Long]
       try {
@@ -268,7 +268,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
   }
 
 
-  def putToSet[T: ByteStringSerializer](key: String, member: T): Boolean = {
+  override def putToSet[T: ByteStringSerializer](key: String, member: T): Boolean = {
     this.synchronized {
       var r = null.asInstanceOf[Boolean]
       try {
@@ -283,7 +283,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     }
   }
 
-  def removeElementFromSetByKey[T: ByteStringSerializer](key: String, members: Seq[T]): Boolean = {
+  override def removeElementFromSetByKey[T: ByteStringSerializer](key: String, members: Seq[T]): Boolean = {
     this.synchronized {
       var r = null.asInstanceOf[Boolean]
       try {
@@ -298,7 +298,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     }
   }
 
-  def getAllFromSetByKey[T: ByteStringDeserializer](key: String): Seq[T] = {
+  override def getAllFromSetByKey[T: ByteStringDeserializer](key: String): Seq[T] = {
     // this.synchronized {
     var r: Seq[T] = null
     try {
@@ -329,7 +329,7 @@ class RedisAkkaImpl private extends Redis with SLF4JLogging {
     }
   }
 
-  def keys(parttern: String): Option[Seq[String]] = {
+  override def keys(parttern: String): Option[Seq[String]] = {
     var r: Option[Seq[String]] = None
     try {
       val result = redis.keys(parttern)

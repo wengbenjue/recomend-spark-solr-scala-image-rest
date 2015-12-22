@@ -2,9 +2,7 @@ package com.soledede.recomend.cache
 
 import com.soledede.recomend.cache.impl.RedisCache
 import com.soledede.recomend.entity.RecommendResult
-import redis.{ByteStringDeserializer, ByteStringSerializer}
 
-import scala.reflect.ClassTag
 
 /**
   * Created by soledede on 2015/12/18.
