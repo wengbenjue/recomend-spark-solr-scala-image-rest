@@ -11,9 +11,11 @@ trait SolrClient {
 
   def searchByQuery[T: ClassTag](query: T, collection: String = "searchcloud"): AnyRef = null
 
-  def searchByUrl(url:String):AnyRef = null
+  def searchByUrl(url: String): AnyRef = null
 
   def close(): Unit = {}
+
+  def connect(): Unit = {}
 }
 
 object SolrClient {

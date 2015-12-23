@@ -1,5 +1,6 @@
 package com.soledede.recomend.solr.impl
 
+import akka.event.slf4j.{SLF4JLogging}
 import com.soledede.recomend.config.Configuration
 import com.soledede.recomend.solr.SolrClient
 import org.apache.solr.client.solrj.SolrQuery
@@ -11,17 +12,17 @@ import scala.reflect.ClassTag
 /**
   * Created by soledede on 2015/12/15.
   */
-class SolJSolrCloudClient private extends SolrClient {
-  val server: CloudSolrClient = SolJSolrCloudClient.singleCloudInstance()
+class SolJSolrCloudClient private extends SolrClient with SLF4JLogging {
+  var server: CloudSolrClient = SolJSolrCloudClient.singleCloudInstance()
 
   override def searchByQuery[T: ClassTag](query: T, collection: String = "searchcloud"): AnyRef = {
-    if (server == null) server.connect()
+    if(server==null) server =  SolJSolrCloudClient.singleCloudInstance()
     var response: QueryResponse = null
     try {
       response = server.query(collection, query.asInstanceOf[SolrQuery])
     } catch {
       case e: Exception =>
-        e.printStackTrace()
+        log.error("search error", e.getCause)
         server.close()
       //TODO Log
     }
@@ -29,6 +30,9 @@ class SolJSolrCloudClient private extends SolrClient {
   }
 
 
+  override def connect(): Unit = {
+    SolJSolrCloudClient.connect()
+  }
 
   override def close(): Unit = {
     SolJSolrCloudClient.close()
@@ -58,6 +62,7 @@ object SolJSolrCloudClient extends Configuration {
           server.setZkConnectTimeout(zkConnectTimeout)
           server.setZkClientTimeout(zkClientTimeout)
           server.setRequestWriter(new BinaryRequestWriter())
+          server.connect()
         }
       }
     }
@@ -67,9 +72,7 @@ object SolJSolrCloudClient extends Configuration {
 
   def connect() = {
     lockSearch.synchronized {
-      if (server == null) {
-        server.connect
-      }
+      singleCloudInstance()
     }
   }
 
@@ -77,6 +80,7 @@ object SolJSolrCloudClient extends Configuration {
     lockSearch.synchronized {
       if (server != null)
         server.close
+      server =null
     }
   }
 

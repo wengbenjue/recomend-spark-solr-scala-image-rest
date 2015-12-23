@@ -56,6 +56,7 @@ class SolrRecommendCF private extends RecommendService {
     query.setRows(20)
     query.setStart(0)
     val response = solrClient.searchByQuery(query, "solritemcf").asInstanceOf[QueryResponse]
+    if (response == null) return null
     val result = response.getResults
     result
   }
@@ -301,7 +302,23 @@ object SolrRecommendCF {
 
   var topNItemsList: Seq[RecommendResult] = null
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
+    test2()
+  }
+
+  def test2() = {
+    val s = new SolrRecommendCF()
+    println("$$$$$$$$$$$$$$$$$$$$$$$$" + s.recommendByUserId("23432", 54))
+    //s.solrClient.close()
+    //Thread.sleep(1000)
+    //s.solrClient.connect()
+    //Thread.sleep(5000)
+    println("############" + s.recommendByUserId("23432", 54))
+    println(s.recommendByUserId("23433", 2))
+    s.solrClient.close()
+  }
+
+  def test1() = {
     //new SolrRecommendCF().asyncTopN2Cache()
     val solrCf = new SolrRecommendCF()
     /*  Thread.sleep(6 * 1000)
@@ -314,4 +331,6 @@ object SolrRecommendCF {
     //Thread.sleep(9000)
     println(solrCf.cache.get("test123"))
   }
+
+
 }
