@@ -68,6 +68,10 @@ object SolrRecommendCategory {
   }
 
   def main(args: Array[String]) {
-    new SolrRecommendCategory().recommendMostLikeCatagoryIdByKeywords("工具")
+   println(test2)
   }
+
+  def test2():Long = System.currentTimeMillis()
+
+  def test1() =  new SolrRecommendCategory().recommendMostLikeCatagoryIdByKeywords("工具")
 }
