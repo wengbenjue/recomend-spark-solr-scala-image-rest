@@ -18,7 +18,7 @@
         <scala.binary.version>2.10</scala.binary.version>
         <slf4j.version>1.6.1</slf4j.version>
         <log4j.version>1.2.17</log4j.version>
-        <io.spray.version>1.3.1</io.spray.version>
+        <io.spray.version>1.3.3</io.spray.version>
         <com.typesafe.akka.version>2.3.14</com.typesafe.akka.version>
         <hadoop.version>2.6.0-cdh5.4.7</hadoop.version>
         <hbase.version>1.0.0-cdh5.4.7</hbase.version>
@@ -51,19 +51,25 @@
 
         <dependency>
             <groupId>io.spray</groupId>
-            <artifactId>spray-can</artifactId>
+            <artifactId>spray-can_${scala.binary.version}</artifactId>
             <version>${io.spray.version}</version>
         </dependency>
         <dependency>
             <groupId>io.spray</groupId>
-            <artifactId>spray-http</artifactId>
+            <artifactId>spray-http_${scala.binary.version}</artifactId>
             <version>${io.spray.version}</version>
         </dependency>
         <dependency>
             <groupId>io.spray</groupId>
-            <artifactId>spray-routing</artifactId>
+            <artifactId>spray-routing_${scala.binary.version}</artifactId>
             <version>${io.spray.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.spray</groupId>
+            <artifactId>spray-json_${scala.binary.version}</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+
 
         <dependency>
             <groupId>net.liftweb</groupId>
@@ -409,7 +415,8 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.soledede.recomend.boot.Boot</mainClass>
                                 </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
                                 <transformer
@@ -428,7 +435,7 @@
                 </executions>
             </plugin>
 
-           <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.4</version>

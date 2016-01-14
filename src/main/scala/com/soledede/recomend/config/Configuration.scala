@@ -30,4 +30,8 @@ trait Configuration {
   //redis
   lazy val redisHost = Try(config.getString("redis.host")).getOrElse("localhost")
   lazy val redisPort = Try(config.getInt("redis.port")).getOrElse(6379)
+
+
+  //open-off
+  lazy val openRecommend = Try(config.getBoolean("recommend.open")).getOrElse(false)
 }
