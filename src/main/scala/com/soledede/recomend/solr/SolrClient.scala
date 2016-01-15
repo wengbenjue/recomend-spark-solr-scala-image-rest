@@ -1,6 +1,7 @@
 package com.soledede.recomend.solr
 
 import com.soledede.recomend.solr.impl.SolJSolrCloudClient
+import org.apache.solr.client.solrj.SolrQuery
 
 import scala.reflect.ClassTag
 
@@ -10,6 +11,10 @@ import scala.reflect.ClassTag
 trait SolrClient {
 
   def searchByQuery[T: ClassTag](query: T, collection: String = "searchcloud"): AnyRef = null
+
+  def searchByQuery[T: ClassTag](baseUrl: String,query: SolrQuery, collection: String , requestHandler: String): Seq[T] = null
+
+  def searchByQuery[T: ClassTag](baseUrl: String,query: SolrQuery, collection: String = "imagesearch"): Seq[T] = searchByQuery(baseUrl,query,collection,null)
 
   def searchByUrl(url: String): AnyRef = null
 

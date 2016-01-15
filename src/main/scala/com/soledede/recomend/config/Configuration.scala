@@ -34,4 +34,12 @@ trait Configuration {
 
   //open-off
   lazy val openRecommend = Try(config.getBoolean("recommend.open")).getOrElse(false)
+
+
+  //image search
+  lazy val solrHost = Try(config.getString("imagesearch.solrHost")).getOrElse("localhost")
+  lazy val solrPort = Try(config.getInt("imagesearch.solrPort")).getOrElse(10000)
+
+  lazy val imageHost = Try(config.getString("imagesearch.imageHost")).getOrElse("localhost")
+  lazy val imagePort = Try(config.getInt("imagesearch.imagePort")).getOrElse(80)
 }

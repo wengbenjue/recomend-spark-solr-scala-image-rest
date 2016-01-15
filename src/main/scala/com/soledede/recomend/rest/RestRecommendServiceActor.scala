@@ -10,6 +10,8 @@ import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.Date
 import com.soledede.recomend.entity.Msg
+import com.soledede.recomend.file.FileProcessService
+import com.soledede.recomend.imageSearch.ImageSearchService
 import com.soledede.recomend.ui.RecommendUI
 import net.liftweb.json.Serialization._
 import net.liftweb.json.{DefaultFormats, DateFormat, Formats}
@@ -23,10 +25,10 @@ import spray.routing._
 import spray.http.MediaTypes._
 import spray.http.BodyPart
 
-case class RMsg(code: Boolean)
+case class RMsg(result: Seq[String], code: Int)
 
 object RJsonProtocol extends DefaultJsonProtocol {
-  implicit val PersonFormat = jsonFormat1(RMsg)
+  implicit val rmsgFormat = jsonFormat2(RMsg)
 }
 
 /**
@@ -54,9 +56,17 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
   var resModuleService: HbaseRecommendModel = null
   var defaultRecommendUI: RecommendUI = null
 
+  var fileProcessService: FileProcessService = null
+
+  var imageSearchService: ImageSearchService = null
+
   if (openRecommend) {
     resModuleService = HbaseRecommendModel()
     defaultRecommendUI = RecommendUI()
+  } else {
+    //image search
+    fileProcessService = FileProcessService()
+    imageSearchService = ImageSearchService()
   }
 
 
@@ -146,13 +156,15 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
               complete {
                 data.get("image") match {
                   case Some(imageEntity) =>
-                    println(imageEntity)
+                    //println(imageEntity)
                     val imageData = imageEntity.entity.data.toByteArray
                     //val contentType = imageEntity.headers.find(h => h.is("content-type")).get.value
                     val fileName = imageEntity.headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
-                    println(s"Uploaded $fileName")
-                    val result = saveAttachment(fileName, imageData)
-                    RMsg(result)
+                    //println(s"Uploaded $fileName")
+                    val result = fileProcessService.saveAttachment(fileName.trim, imageData, fileDir)
+                    val resultList = imageSearchService.search(fileName.trim, 0, 10)
+                    //println("+++++++++++++++++++++++++++"+resultList)
+                    if(resultList==null || resultList.size== 0) RMsg(List(""),-1) else RMsg(resultList, if (result) 0 else -1)
                   case None =>
                     println("No files")
                     "Not OK"
@@ -171,34 +183,6 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
         <h1>欢迎...</h1>
       </body>
     </html>
-
-
-  private def saveAttachment(fileName: String, content: Array[Byte]): Boolean = {
-    saveAttachment[Array[Byte]](fileName, content, { (is, os) => os.write(is) })
-    true
-  }
-
-  private def saveAttachment(fileName: String, content: InputStream): Boolean = {
-    saveAttachment[InputStream](fileName, content, { (is, os) =>
-      val buffer = new Array[Byte](16384)
-      Iterator
-        .continually(is.read(buffer))
-        .takeWhile(-1 !=)
-        .foreach(read => os.write(buffer, 0, read))
-    }
-    )
-  }
-
-  private def saveAttachment[T](fileName: String, content: T, writeFile: (T, OutputStream) => Unit): Boolean = {
-    try {
-      val fos = new java.io.FileOutputStream(fileDir + fileName)
-      writeFile(content, fos)
-      fos.close()
-      true
-    } catch {
-      case _ => false
-    }
-  }
 
 
   /**
