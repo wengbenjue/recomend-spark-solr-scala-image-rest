@@ -48,7 +48,6 @@ class RestRecommendServiceActor extends Actor with RestService {
   */
 trait RestService extends HttpService with SLF4JLogging with Configuration with spray.httpx.SprayJsonSupport {
 
-  final val fileDir = "/Users/soledede/Documents/"
 
   import RJsonProtocol._
 
@@ -152,25 +151,39 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
         detach() {
           post {
             entity(as[MultipartFormData]) { data =>
-              println(data)
+              //println(data)
               complete {
-                data.get("image") match {
-                  case Some(imageEntity) =>
-                    //println(imageEntity)
-                    val imageData = imageEntity.entity.data.toByteArray
-                    //val contentType = imageEntity.headers.find(h => h.is("content-type")).get.value
-                    val fileName = imageEntity.headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
-                    //println(s"Uploaded $fileName")
-                    val result = fileProcessService.saveAttachment(fileName.trim, imageData, fileDir)
-                    val resultList = imageSearchService.search(fileName.trim, 0, 10)
-                    //println("+++++++++++++++++++++++++++"+resultList)
-                    if(resultList==null || resultList.size== 0) RMsg(List(""),-1) else RMsg(resultList, if (result) 0 else -1)
-                  case None =>
-                    println("No files")
-                    "Not OK"
+                try {
+                  val start = data.get("start").get.entity.data.toByteString.decodeString("utf-8").toInt
+                  val size = data.get("size").get.entity.data.toByteString.decodeString("utf-8").toInt
+                  data.get("image") match {
+                    case Some(imageEntity) =>
+                      //println(imageEntity)
+                      val imageData = imageEntity.entity.data.toByteArray
+                      //val contentType = imageEntity.headers.find(h => h.is("content-type")).get.value
+                      val fileName = imageEntity.headers.find(h => h.is("content-disposition")).get.value.split("filename=").last
+                      //println(s"Uploaded $fileName")
+                      val result = fileProcessService.saveAttachment(fileName.trim, imageData, fileDir)
+                      val resultList = imageSearchService.search(fileName.trim, start, size)
+                      log.debug("+++++++++++++++++++++++++++" + resultList)
+                      if (resultList == null || resultList.size == 0)
+                      //RMsg(List("http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg"), -1)
+                        RMsg(List(), -1)
+                      else RMsg(resultList, if (result) 0 else -1)
+                    case None =>
+                      println("No files")
+                      "Not OK"
+                      RMsg(List(), -1)
+                  }
+                } catch {
+                  case e: Exception =>
+                    log.error("faield!", e)
+                    RMsg(List(), -1)
+                  // RMsg(List("http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg","http://121.199.42.48/Corbis-42-29760979.jpg", "http://121.199.42.48/Corbis-42-26783190.jpg", "http://121.199.42.48/Corbis-42-17545454.jpg", "http://121.199.42.48/Corbis-42-15434454.jpg", "http://121.199.42.48/Corbis-42-15287780.jpg"), -1)
                 }
               }
             }
+
           }
         }
       }

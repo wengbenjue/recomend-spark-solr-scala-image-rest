@@ -43,9 +43,9 @@ class HttpSolrQuery extends SolrClient {
         }.toList
       }
 
-      println(listString)
+      //println(listString)
     }
-    null
+    listString.asInstanceOf[Seq[T]]
   }
 }
 
@@ -64,7 +64,7 @@ object HttpSolrQuery {
       val server = new HttpSolrClient(url)
       //server.setBaseURL();
       //server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
-      server.setConnectionTimeout(5000) // 5 seconds to establish TCP
+      server.setConnectionTimeout(60*1000) // 1 minute to establish TCP
       // Setting the XML response parser is only required for cross
       // version compatibility and only when one side is 1.4.1 or
       // earlier and the other side is 3.1 or later.
@@ -72,7 +72,7 @@ object HttpSolrQuery {
       // The following settings are provided here for completeness.
       // They will not normally be required, and should only be used
       // after consulting javadocs to know whether they are truly required.
-      server.setSoTimeout(1000) // socket read timeout
+      server.setSoTimeout(4000) // socket read timeout
       server.setDefaultMaxConnectionsPerHost(100)
       server.setMaxTotalConnections(100)
       // server.setFollowRedirects(false); // defaults to false

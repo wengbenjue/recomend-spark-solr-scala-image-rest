@@ -18,7 +18,7 @@ class DefaultImageSearchServiceImpl extends ImageSearchService with Configuratio
     query.setFields("id")
     query.setStart(start)
     query.setRows(size)
-    HttpSolrQuery().searchByQuery(url, query)
+    HttpSolrQuery().searchByQuery[Seq[String]](url, query).asInstanceOf[Seq[String]]
   }
 }
 

@@ -42,4 +42,6 @@ trait Configuration {
 
   lazy val imageHost = Try(config.getString("imagesearch.imageHost")).getOrElse("localhost")
   lazy val imagePort = Try(config.getInt("imagesearch.imagePort")).getOrElse(80)
+  lazy val fileDir = Try(config.getString("imagesearch.fileDir")).getOrElse("/Users/soledede/Documents/")
+
 }
