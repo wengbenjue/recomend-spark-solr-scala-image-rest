@@ -2,6 +2,7 @@ package com.soledede.recomend.solr.impl
 
 import java.util
 
+import com.soledede.recomend.config.Configuration
 import com.soledede.recomend.solr.SolrClient
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.SolrQuery.ORDER
@@ -18,8 +19,9 @@ import scala.reflect.ClassTag
 /**
   * Created by soledede on 2015/12/16.
   */
-class HttpSolrQuery extends SolrClient {
-  val httpPrefix: String = "http://image/"
+class HttpSolrQuery extends SolrClient with Configuration{
+  //val httpPrefix: String = "http://image/"
+  val httpPrefix: String = "http://" + imageHost + ":" + imagePort + "/"
 
 
   override def searchByUrl(url: String): AnyRef = {
@@ -28,6 +30,7 @@ class HttpSolrQuery extends SolrClient {
   }
 
   override def searchByQuery[T: ClassTag](baseUrl: String, query: SolrQuery, collection: String, requestHandler: String): Seq[T] = {
+
     val server = HttpSolrQuery.singletonHttpSolrClient(baseUrl)
     val response: QueryResponse = server.query(collection, query)
     var listString: List[String] = null
