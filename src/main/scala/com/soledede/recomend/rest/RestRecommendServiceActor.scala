@@ -4,11 +4,12 @@ import java.io.{FileOutputStream, OutputStream, InputStream, ByteArrayInputStrea
 
 import akka.actor.{Actor}
 import akka.event.slf4j.SLF4JLogging
+import com.alibaba.fastjson.util.Base64
 import com.soledede.recomend.config.Configuration
 import com.soledede.recomend.dao.HbaseRecommendModel
 import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
-import java.util.Date
+import java.util.{Date}
 import com.soledede.recomend.entity.Msg
 import com.soledede.recomend.file.FileProcessService
 import com.soledede.recomend.imageSearch.ImageSearchService
@@ -17,7 +18,7 @@ import net.liftweb.json.Serialization._
 import net.liftweb.json.{DefaultFormats, DateFormat, Formats}
 import spray.httpx.SprayJsonSupport
 import spray.httpx.marshalling.MetaMarshallers
-import spray.json.DefaultJsonProtocol
+import spray.json.DefaultJsonProtocol._
 import scala.Some
 import spray.http._
 import spray.httpx.unmarshalling._
@@ -25,11 +26,35 @@ import spray.routing._
 import spray.http.MediaTypes._
 import spray.http.BodyPart
 
+
+/*object MyS extends DefaultJsonProtocol {
+  implicit val rmsgFormat = jsonFormat2(RMsg)
+}*/
+
 case class RMsg(result: Seq[String], code: Int)
 
-object RJsonProtocol extends DefaultJsonProtocol {
-  implicit val rmsgFormat = jsonFormat2(RMsg)
+object RMsg {
+  implicit val rmsgFormat = jsonFormat2(RMsg.apply)
 }
+
+case class VMsg(result: Seq[Video])
+
+object Video {
+  implicit val video = jsonFormat2(Video.apply)
+}
+
+case class Video(name: String, url: String)
+
+object VMsg {
+  implicit val videoMsg = jsonFormat1(VMsg.apply)
+}
+
+case class Base64Post(start: String, size: String, filename: String, filedata: String)
+
+object Base64Post {
+  implicit val base64Post = jsonFormat4(Base64Post.apply)
+}
+
 
 /**
   *
@@ -49,7 +74,7 @@ class RestRecommendServiceActor extends Actor with RestService {
 trait RestService extends HttpService with SLF4JLogging with Configuration with spray.httpx.SprayJsonSupport {
 
 
-  import RJsonProtocol._
+  //import RJsonProtocol._
 
 
   var resModuleService: HbaseRecommendModel = null
@@ -136,7 +161,27 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
   }
 
 
+  val videoService = imageHost + ":" + imagePort
+
+  val recommend_introduce = "http://" + videoService + "/video/recommend_introduce.mp4";
+  val recommend_indtroduceName = "推荐系统介绍";
+
+  val leastSquare = "http://" + videoService + "/video/ml-least_square.mp4";
+  val leastSquareName = "最小二乘法";
+  val boltzmannCf = "http://" + videoService + "/video/boltzmann_cf.mp4";
+  val boltzmannCfName = "玻尔兹曼机协同过滤";
+  val native_bayes = "http://" + videoService + "/video/native_bayes.mp4";
+  val native_bayesName = "朴素贝叶斯实现分类";
+
+  val em = "http://" + videoService + "/video/em.mp4";
+  val emName = "EM算法";
+  val hmm_viterbi_decode = "http://" + videoService + "/video/hmm_viterbi_decode.mp4";
+  val hmm_viterbi_decodeName = "Viterbi解码算法";
+
+  val videoList = VMsg(List(Video(recommend_indtroduceName, recommend_introduce)))
+
   //implicit def json4sFormats: Formats = DefaultFormats
+
 
   val restRout: Route = {
     path("") {
@@ -147,6 +192,17 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
         redirect("http://soledede.com/", StatusCodes.MovedPermanently)
       }
     } ~
+      path("soledede" / "video") {
+        detach() {
+          get {
+            respondWithMediaType(MediaTypes.`application/json`) {
+              complete {
+                videoList
+              }
+            }
+          }
+        }
+      } ~
       path("soledede" / "image") {
         detach() {
           post {
@@ -184,9 +240,44 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
 
           }
         }
+      } ~
+      path("soledede" / "imagejson") {
+        detach() {
+          post {
+            respondWithMediaType(MediaTypes.`application/json`) {
+              entity(as[Base64Post]) { postJsonData =>
+                complete {
+
+                  try {
+                    val start = postJsonData.start.trim.toInt
+
+                    val size = postJsonData.size.trim.toInt
+
+                    val fileName = postJsonData.filename.trim
+
+                    // String imageDataBytes = postJsonData.substring(postJsonData.indexOf(",") + 1);
+                    //new ByteArrayInputStream(Base64.decode(postJsonData.filedata.getBytes(), Base64.DEFAULT));
+
+                    val imageDataStream = new ByteArrayInputStream(Base64.decodeFast(postJsonData.filedata))
+                    val result = fileProcessService.saveAttachment(fileName, imageDataStream, fileDir)
+                    val resultList = imageSearchService.search(fileName, start, size)
+                    log.debug("+++++++++++++++++++++++++++" + resultList)
+                    if (resultList == null || resultList.size == 0)
+                      RMsg(List(), -1)
+                    else RMsg(resultList, if (result) 0 else -1)
+                  } catch {
+                    case e: Exception =>
+                      log.error("faield!", e)
+                      RMsg(List(), -1)
+                  }
+                }
+              }
+
+            }
+          }
+        }
       }
   }
-
 
   lazy val index =
     <html>
