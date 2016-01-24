@@ -2,6 +2,7 @@ package com.soledede.recomend.cache
 
 import com.soledede.recomend.cache.impl.RedisCache
 import com.soledede.recomend.entity.RecommendResult
+import com.soledede.recomend.rest.VMsg
 
 import scala.reflect.ClassTag
 
@@ -14,6 +15,10 @@ trait KVCache {
   def put(key: String, value: Seq[RecommendResult], expiredTime: Long = 60 * 60 * 17): Boolean = false
 
   def get(key: String): Seq[RecommendResult] = null
+
+  def putStringList(key: String, value: Seq[String], expiredTime  : Long = 60 * 60 * 17): Boolean = false
+
+  def getStringList(key: String): Seq[String] = null
 
   def getCache[T: ClassTag](key: String): T = null.asInstanceOf[T]
 

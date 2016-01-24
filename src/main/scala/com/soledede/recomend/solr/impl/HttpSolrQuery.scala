@@ -96,6 +96,9 @@ object HttpSolrQuery {
     query.setFields("id")
     query.setStart(0)
     query.setRows(10)
+    query.setParam("accuracy","0.98")
+    query.setParam("candidates","97000")
+
     HttpSolrQuery().searchByQuery(url, query)
 
   }

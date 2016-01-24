@@ -6,6 +6,7 @@ import akka.util.ByteString
 import com.soledede.recomend.cache.KVCache
 import com.soledede.recomend.entity.RecommendResult
 import com.soledede.recomend.redis.Redis
+import com.soledede.recomend.rest.VMsg
 import redis.{ByteStringFormatter, ByteStringDeserializer, ByteStringSerializer}
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{write, read}
@@ -33,6 +34,25 @@ class RedisCache private extends KVCache with SLF4JLogging {
     }
   }
 
+
+
+
+
+  private val Seperator = "#&#&#"
+  implicit val stringFormatter = new ByteStringFormatter[Seq[String]] {
+    def serialize(vS: Seq[String]): ByteString = {
+      ByteString(
+        write(vS)
+      )
+    }
+
+    def deserialize(bs: ByteString): Seq[String] = {
+      val r = bs.utf8String
+      read[Seq[String]](r)
+    }
+  }
+
+
   override def put(key: String, value: Seq[RecommendResult], expiredTime: Long): Boolean = {
     redis.setValue[Seq[RecommendResult]](key, value, expiredTime)
   }
@@ -51,6 +71,16 @@ class RedisCache private extends KVCache with SLF4JLogging {
 
   override def putCache[T: ClassTag](key: String, value: T, expiredTime: Long): Boolean = {
     redis.setValue[String](key, value.toString, expiredTime)
+  }
+
+  override def putStringList(key: String, value: Seq[String], expiredTime: Long): Boolean = {
+    redis.setValue[Seq[String]](key, value, expiredTime)
+  }
+
+  override def getStringList(key: String): Seq[String] = {
+    val oR = redis.getValue[Seq[String]](key)
+    if (oR == null) null
+    else oR.getOrElse(null)
   }
 }
 

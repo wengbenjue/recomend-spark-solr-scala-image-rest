@@ -1,21 +1,24 @@
 package com.soledede.recomend.rest
 
 import java.io.{FileOutputStream, OutputStream, InputStream, ByteArrayInputStream}
+import java.util.regex.Pattern
 
 import akka.actor.{Actor}
 import akka.event.slf4j.SLF4JLogging
+import akka.util.ByteString
 import com.alibaba.fastjson.util.Base64
 import com.soledede.recomend.config.Configuration
 import com.soledede.recomend.dao.HbaseRecommendModel
 import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.{Date}
-import com.soledede.recomend.entity.Msg
+import com.soledede.recomend.entity.{RecommendResult, Msg}
 import com.soledede.recomend.file.FileProcessService
 import com.soledede.recomend.imageSearch.ImageSearchService
 import com.soledede.recomend.ui.RecommendUI
 import net.liftweb.json.Serialization._
 import net.liftweb.json.{DefaultFormats, DateFormat, Formats}
+import redis.ByteStringFormatter
 import spray.httpx.SprayJsonSupport
 import spray.httpx.marshalling.MetaMarshallers
 import spray.json.DefaultJsonProtocol._
@@ -25,6 +28,8 @@ import spray.httpx.unmarshalling._
 import spray.routing._
 import spray.http.MediaTypes._
 import spray.http.BodyPart
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{write, read}
 
 
 /*object MyS extends DefaultJsonProtocol {
@@ -41,12 +46,16 @@ case class VMsg(result: Seq[Video])
 
 object Video {
   implicit val video = jsonFormat2(Video.apply)
+
+
+
 }
 
 case class Video(name: String, url: String)
 
 object VMsg {
   implicit val videoMsg = jsonFormat1(VMsg.apply)
+
 }
 
 case class Base64Post(start: String, size: String, filename: String, filedata: String)
