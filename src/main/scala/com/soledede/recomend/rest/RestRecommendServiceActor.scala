@@ -44,14 +44,87 @@ object RMsg {
 
 case class VMsg(result: Seq[Video])
 
-object Video {
-  implicit val video = jsonFormat2(Video.apply)
+object Video extends Configuration{
+  implicit val video = jsonFormat4(Video.apply)
+
+  def listStaticVideo():Seq[Video] = {
+
+    val videoService = imageHost + ":" + imagePort
 
 
+    val leastSquareName = "形象理解最小二乘法"
+    val leastSquareDesc = "拟合最优超平面，使得误差和最小"
+    val leastSquareUrl = "http://" + videoService + "/video/ml-least_square.mp4"
+    val leastImg = "http://a1.qpic.cn/psb?/V10sqCyZ06hzDJ/lWpCMe4e0G5ltPhJhlaO0tCS9oC5m3XzqzDWvw5MSGY!/b/dAIBAAAAAAAA&bo=IAPSAQAAAAADB9I!&rf=viewer_4"
+    val leastSquareVideo = Video(leastSquareName,leastSquareDesc,leastSquareUrl,leastImg)
+
+
+    val pictureGradientName = "形象理解梯度下降算法"
+    val pictureGradienDesc = "既不能得全局最小值,也得逼近局部最小值"
+    val pictureGradienUrl = "http://" + videoService + "/video/picture_gradient.mp4"
+    val pictureGradienImg = "http://t.cn/R4GsikL"
+    val pictureGradienVideo = Video(pictureGradientName,pictureGradienDesc,pictureGradienUrl,pictureGradienImg)
+
+
+
+    val boltzmannCfName = "玻尔兹曼机协同过滤"
+    val boltzmannCfDesc = "怎么用深度学习建模评分矩阵"
+    val boltzmannCfUrl = "http://" + videoService + "/video/boltzmann_cf.mp4"
+    val boltzmannCfImg = "http://a2.qpic.cn/psb?/V10sqCyZ06hzDJ/AGSUYdrRIAd*2p3K69CMCXcDymO41Gb6IY0gWFtWOLM!/b/dP0AAAAAAAAA&bo=IAP6AQAAAAADB*o!&rf=viewer_4"
+    val boltzmannCfVideo = Video(boltzmannCfName,boltzmannCfDesc,boltzmannCfUrl,boltzmannCfImg)
+
+
+
+    val hmmViterbiDecodeName = "Viterbi解码算法"
+    val hmmViterbiDecodeDesc = "信道模型之解码问题"
+    val hmmViterbiDecodeUrl = "http://" + videoService + "/video/hmm_viterbi_decode.mp4"
+    val hmmViterbiDecodeImg = "http://a3.qpic.cn/psb?/V10sqCyZ06hzDJ/YytiurFA2VyacA9Gi.2xLPWBFaTUMYBHfl51.subhNg!/b/dPsAAAAAAAAA&bo=IAPMAQAAAAADB8w!&rf=viewer_4"
+   // val hmmViterbiDecodeVideo = Video(hmmViterbiDecodeName,hmmViterbiDecodeDesc,hmmViterbiDecodeUrl,hmmViterbiDecodeImg)
+
+
+    val hmmBaumWelchName = "HMM-前向后向算法"
+    val hmmBaumWelchDesc = "利用baumwelch求隐变量,利用Dynamic Programming可以大大减少计算量"
+    val hmmBaumWelchUrl = "http://" + videoService + "/video/hmm-baum-welch.mp4"
+    val hmmBaumWelchImg = "http://a2.qpic.cn/psb?/V10sqCyZ06hzDJ/c3hb4a0v4qAAxeRbYF69E7CpMEaPV7*sPBEJyIfydPE!/b/dKYAAAAAAAAA&bo=IAO.AQAAAAADB74!&rf=viewer_4"
+    val hmmBaumWelchVideo = Video(hmmBaumWelchName,hmmBaumWelchDesc,hmmBaumWelchUrl,hmmBaumWelchImg)
+
+
+
+    val nativeBayesName = "朴素贝叶斯实现文本分类"
+    val nativeBayesDesc = "Bayes实现垃圾邮件过滤,智能聊天系统,主题分类..."
+    val nativeBayesUrl = "http://" + videoService + "/video/native_bayes.mp4"
+    val nativeBayesimg = "http://a1.qpic.cn/psb?/V10sqCyZ06hzDJ/vnBmrXm2f8OYoRIpXsGEzRgkEndLotRl8qioRj7Tvqs!/b/dAIBAAAAAAAA&bo=IAPEAQAAAAADB8Q!&rf=viewer_4"
+    val nativeBayesVideo = Video(nativeBayesName,nativeBayesDesc,nativeBayesUrl,nativeBayesimg)
+
+
+
+    val emName = "期望最大化(EM)算法"
+    val emDesc = "如果将样本看作观察值，潜在类别看作是隐藏变量那么聚类问题也就是参数估计问题"
+    val emUrl = "http://" + videoService + "/video/em.mp4"
+    val emImg = "http://a1.qpic.cn/psb?/V10sqCyZ06hzDJ/bv8tPwrLygsnQ5f8SF1T9V5fy4wNItGw.RsF0Arp3Ik!/b/dPwAAAAAAAAA&bo=IAO5AQAAAAADB7k!&rf=viewer_4"
+    val emVideo = Video(emName,emDesc,emUrl,emImg)
+
+
+    val solrItemcfName = "Solr实现ItemCF个性化推荐算法"
+    val solrItemcfDesc = "借助lucene的向量空间模型以及solr的facet实现推荐"
+    val solrItemcfUrl = "http://" + videoService + "/video/solr_itemcf.mp4"
+    val solrItemcfImg = "http://t.cn/R4JasVf"
+    val solrItemcfVideo = Video(solrItemcfName,solrItemcfDesc,solrItemcfUrl,solrItemcfImg)
+
+
+    val recommendIndtroduceName = "推荐系统介绍"
+    val recommendIntroduceDesc = "一、推荐系统的介绍,二、大数据介绍及相关环境搭建"
+    val recommendIntroduceUrl = "http://" + videoService + "/video/recommend_introduce.mp4"
+    val recommendIntroduceImg = "http://a2.qpic.cn/psb?/V10sqCyZ06hzDJ/yfsAI2wh5B4M50pXAg6m5gHEqA8lkkmze1yf9LnzUSw!/b/dKkAAAAAAAAA&bo=IAPFAQAAAAADB8U!&rf=viewer_4"
+    val recomndeIntroduceVideo = Video(recommendIndtroduceName,recommendIntroduceDesc,recommendIntroduceUrl,recommendIntroduceImg)
+
+
+    List(leastSquareVideo,pictureGradienVideo,boltzmannCfVideo,hmmBaumWelchVideo,nativeBayesVideo,emVideo,solrItemcfVideo,recomndeIntroduceVideo)
+  }
 
 }
 
-case class Video(name: String, url: String)
+case class Video(name: String,descrition:String, url: String,img: String)
 
 object VMsg {
   implicit val videoMsg = jsonFormat1(VMsg.apply)
@@ -170,24 +243,9 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
   }
 
 
-  val videoService = imageHost + ":" + imagePort
 
-  val recommend_introduce = "http://" + videoService + "/video/recommend_introduce.mp4";
-  val recommend_indtroduceName = "推荐系统介绍";
 
-  val leastSquare = "http://" + videoService + "/video/ml-least_square.mp4";
-  val leastSquareName = "最小二乘法";
-  val boltzmannCf = "http://" + videoService + "/video/boltzmann_cf.mp4";
-  val boltzmannCfName = "玻尔兹曼机协同过滤";
-  val native_bayes = "http://" + videoService + "/video/native_bayes.mp4";
-  val native_bayesName = "朴素贝叶斯实现分类";
 
-  val em = "http://" + videoService + "/video/em.mp4";
-  val emName = "EM算法";
-  val hmm_viterbi_decode = "http://" + videoService + "/video/hmm_viterbi_decode.mp4";
-  val hmm_viterbi_decodeName = "Viterbi解码算法";
-
-  val videoList = VMsg(List(Video(recommend_indtroduceName, recommend_introduce)))
 
   //implicit def json4sFormats: Formats = DefaultFormats
 
@@ -206,6 +264,7 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
           get {
             respondWithMediaType(MediaTypes.`application/json`) {
               complete {
+                val videoList = VMsg(Video.listStaticVideo())
                 videoList
               }
             }
@@ -354,3 +413,12 @@ println("No files")
 }
 }*/
 
+object test{
+  def main(args: Array[String]) {
+    val fileDir = "/Users/soledede/Documents/images"
+    val base64S = "iVBORw0KGgoAAAANSUhEUgAAAH0AAABTCAIAAAA9RJ80AAAAzklEQVR4nO3QQREAIAzAMMC/5+GCPGgU9LpnZuW5owM+1Xej70bfjb4bfTf6bvTd6LvRd6PvRt+Nvht9N/pu9N3ou9F3o+9G342+G303+m703ei70Xej70bfjb4bfTf6bvTd6LvRd6PvRt+Nvht9N/pu9N3ou9F3o+9G342+G303+m703ei70Xej70bfjb4bfTf6bvTd6LvRd6PvRt+Nvht9N/pu9N3ou9F3o+9G342+G303+m703ei70Xej70bfjb4bfTf6bvTd6LvRd+MCXBoDo8Qme9oAAAAASUVORK5CYII="
+    val fileProcessService = FileProcessService()
+    val imageDataStream = new ByteArrayInputStream(Base64.decodeFast(base64S))
+    val result = fileProcessService.saveAttachment("testBase.png", imageDataStream, fileDir)
+  }
+}
