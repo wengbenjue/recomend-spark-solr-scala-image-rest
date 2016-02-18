@@ -12,7 +12,7 @@ import com.soledede.recomend.dao.HbaseRecommendModel
 import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.{Date}
-import com.soledede.recomend.entity.{RecommendResult, Msg}
+import com.soledede.recomend.entity.{MergeCloud, RecommendResult, Msg}
 import com.soledede.recomend.file.FileProcessService
 import com.soledede.recomend.imageSearch.ImageSearchService
 import com.soledede.recomend.ui.RecommendUI
@@ -239,7 +239,15 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
                 else Right(defaultRecommendUI.recommendByUserId(userId, number))
               }
           }
+      }~
+    path("mergecloud"){
+      get{
+        ctx: RequestContext =>
+          handleRequest(ctx) {
+              Right(new MergeCloud())
+          }
       }
+    }
   }
 
 

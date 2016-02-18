@@ -26,7 +26,7 @@ trait KVCache {
 
 }
 
-object KVCache {
+object KVCache { 
   def apply(kvType: String = "redis"): KVCache = {
     kvType match {
       case "redis" => RedisCache()
