@@ -256,43 +256,44 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
             handleRequest(ctx) {
               val list = new ListBuffer[MergeCloud]()
               val m1 = new MergeCloud()
-              m1.id = "1003435"
+              m1.id = "1"
               m1.isRestrictedArea = 1
               list += m1
               val m2 = new MergeCloud()
-              m2.id = "1004254"
+              m2.id = "2"
               m2.title = "奔驰轮胎,车主可随叫随到"
               m2.cityId = "4_5_9_243"
               m2.isRestrictedArea = 1
               list += m2
               val m3 = new MergeCloud()
-              m3.id = "1094454"
+              m3.id = "3"
               m3.cityId = "321_34_135_5"
               m3.isRestrictedArea = 1
               list += m3
               val m4 = new MergeCloud()
-              m4.id = "2003055"
+              m4.id = "4"
               m4.isRestrictedArea = 1
               list += m4
               val m5 = new MergeCloud()
-              m5.id = "205663"
+              m5.id = "5"
               m5.title = "橡胶塑料袋10袋起卖"
               m5.cityId = "2_3562_42_90"
               m5.isRestrictedArea = 1
               list += m5
               val m6 = new MergeCloud()
-              m6.id = "454676343"
+              m6.id = "6"
               m6.cityId = "564"
               m6.isRestrictedArea = 1
               list += m6
 
               val m7 = new MergeCloud()
-              m1.id = "5683435"
+              m7.id = "7"
               list += m7
               val m8 = new MergeCloud()
-              m1.id = "452"
+              m8.id = "8"
               list += m8
               val m9 = new MergeCloud()
+              m9.id = "9"
               list += m9
 
               Right(list)
