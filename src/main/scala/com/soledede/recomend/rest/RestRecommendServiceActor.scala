@@ -12,7 +12,7 @@ import com.soledede.recomend.dao.HbaseRecommendModel
 import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.{Date}
-import com.soledede.recomend.entity.{MergeCloud, RecommendResult, Msg}
+import com.soledede.recomend.entity.{ScreenCloud, MergeCloud, RecommendResult, Msg}
 import com.soledede.recomend.file.FileProcessService
 import com.soledede.recomend.imageSearch.ImageSearchService
 import com.soledede.recomend.ui.RecommendUI
@@ -31,6 +31,8 @@ import spray.http.BodyPart
 import net.liftweb.json._
 import net.liftweb.json.Serialization.{write, read}
 
+import scala.collection.mutable.ListBuffer
+
 
 /*object MyS extends DefaultJsonProtocol {
   implicit val rmsgFormat = jsonFormat2(RMsg)
@@ -44,10 +46,10 @@ object RMsg {
 
 case class VMsg(result: Seq[Video])
 
-object Video extends Configuration{
+object Video extends Configuration {
   implicit val video = jsonFormat4(Video.apply)
 
-  def listStaticVideo():Seq[Video] = {
+  def listStaticVideo(): Seq[Video] = {
 
     val videoService = imageHost + ":" + imagePort
 
@@ -56,14 +58,14 @@ object Video extends Configuration{
     val leastSquareDesc = "拟合最优超平面，使得误差和最小"
     val leastSquareUrl = "http://" + videoService + "/video/ml-least_square.mp4"
     val leastImg = "http://a1.qpic.cn/psb?/V10sqCyZ06hzDJ/lWpCMe4e0G5ltPhJhlaO0tCS9oC5m3XzqzDWvw5MSGY!/b/dAIBAAAAAAAA&bo=IAPSAQAAAAADB9I!&rf=viewer_4"
-    val leastSquareVideo = Video(leastSquareName,leastSquareDesc,leastSquareUrl,leastImg)
+    val leastSquareVideo = Video(leastSquareName, leastSquareDesc, leastSquareUrl, leastImg)
 
 
     val pictureGradientName = "形象理解梯度下降算法"
     val pictureGradienDesc = "既不能得全局最小值,也得逼近局部最小值"
     val pictureGradienUrl = "http://" + videoService + "/video/picture_gradient.mp4"
     val pictureGradienImg = "http://t.cn/R4GsikL"
-    val pictureGradienVideo = Video(pictureGradientName,pictureGradienDesc,pictureGradienUrl,pictureGradienImg)
+    val pictureGradienVideo = Video(pictureGradientName, pictureGradienDesc, pictureGradienUrl, pictureGradienImg)
 
 
 
@@ -71,7 +73,7 @@ object Video extends Configuration{
     val boltzmannCfDesc = "怎么用深度学习建模评分矩阵"
     val boltzmannCfUrl = "http://" + videoService + "/video/boltzmann_cf.mp4"
     val boltzmannCfImg = "http://a2.qpic.cn/psb?/V10sqCyZ06hzDJ/AGSUYdrRIAd*2p3K69CMCXcDymO41Gb6IY0gWFtWOLM!/b/dP0AAAAAAAAA&bo=IAP6AQAAAAADB*o!&rf=viewer_4"
-    val boltzmannCfVideo = Video(boltzmannCfName,boltzmannCfDesc,boltzmannCfUrl,boltzmannCfImg)
+    val boltzmannCfVideo = Video(boltzmannCfName, boltzmannCfDesc, boltzmannCfUrl, boltzmannCfImg)
 
 
 
@@ -79,14 +81,14 @@ object Video extends Configuration{
     val hmmViterbiDecodeDesc = "信道模型之解码问题"
     val hmmViterbiDecodeUrl = "http://" + videoService + "/video/hmm_viterbi_decode.mp4"
     val hmmViterbiDecodeImg = "http://a3.qpic.cn/psb?/V10sqCyZ06hzDJ/YytiurFA2VyacA9Gi.2xLPWBFaTUMYBHfl51.subhNg!/b/dPsAAAAAAAAA&bo=IAPMAQAAAAADB8w!&rf=viewer_4"
-   // val hmmViterbiDecodeVideo = Video(hmmViterbiDecodeName,hmmViterbiDecodeDesc,hmmViterbiDecodeUrl,hmmViterbiDecodeImg)
+    // val hmmViterbiDecodeVideo = Video(hmmViterbiDecodeName,hmmViterbiDecodeDesc,hmmViterbiDecodeUrl,hmmViterbiDecodeImg)
 
 
     val hmmBaumWelchName = "HMM-前向后向算法"
     val hmmBaumWelchDesc = "利用baumwelch求隐变量,利用Dynamic Programming可以大大减少计算量"
     val hmmBaumWelchUrl = "http://" + videoService + "/video/hmm-baum-welch.mp4"
     val hmmBaumWelchImg = "http://a2.qpic.cn/psb?/V10sqCyZ06hzDJ/c3hb4a0v4qAAxeRbYF69E7CpMEaPV7*sPBEJyIfydPE!/b/dKYAAAAAAAAA&bo=IAO.AQAAAAADB74!&rf=viewer_4"
-    val hmmBaumWelchVideo = Video(hmmBaumWelchName,hmmBaumWelchDesc,hmmBaumWelchUrl,hmmBaumWelchImg)
+    val hmmBaumWelchVideo = Video(hmmBaumWelchName, hmmBaumWelchDesc, hmmBaumWelchUrl, hmmBaumWelchImg)
 
 
 
@@ -94,7 +96,7 @@ object Video extends Configuration{
     val nativeBayesDesc = "Bayes实现垃圾邮件过滤,智能聊天系统,主题分类..."
     val nativeBayesUrl = "http://" + videoService + "/video/native_bayes.mp4"
     val nativeBayesimg = "http://a1.qpic.cn/psb?/V10sqCyZ06hzDJ/vnBmrXm2f8OYoRIpXsGEzRgkEndLotRl8qioRj7Tvqs!/b/dAIBAAAAAAAA&bo=IAPEAQAAAAADB8Q!&rf=viewer_4"
-    val nativeBayesVideo = Video(nativeBayesName,nativeBayesDesc,nativeBayesUrl,nativeBayesimg)
+    val nativeBayesVideo = Video(nativeBayesName, nativeBayesDesc, nativeBayesUrl, nativeBayesimg)
 
 
 
@@ -102,29 +104,29 @@ object Video extends Configuration{
     val emDesc = "如果将样本看作观察值，潜在类别看作是隐藏变量那么聚类问题也就是参数估计问题"
     val emUrl = "http://" + videoService + "/video/em.mp4"
     val emImg = "http://a1.qpic.cn/psb?/V10sqCyZ06hzDJ/bv8tPwrLygsnQ5f8SF1T9V5fy4wNItGw.RsF0Arp3Ik!/b/dPwAAAAAAAAA&bo=IAO5AQAAAAADB7k!&rf=viewer_4"
-    val emVideo = Video(emName,emDesc,emUrl,emImg)
+    val emVideo = Video(emName, emDesc, emUrl, emImg)
 
 
     val solrItemcfName = "Solr实现ItemCF个性化推荐算法"
     val solrItemcfDesc = "借助lucene的向量空间模型以及solr的facet实现推荐"
     val solrItemcfUrl = "http://" + videoService + "/video/solr_itemcf.mp4"
     val solrItemcfImg = "http://t.cn/R4JasVf"
-    val solrItemcfVideo = Video(solrItemcfName,solrItemcfDesc,solrItemcfUrl,solrItemcfImg)
+    val solrItemcfVideo = Video(solrItemcfName, solrItemcfDesc, solrItemcfUrl, solrItemcfImg)
 
 
     val recommendIndtroduceName = "推荐系统介绍"
     val recommendIntroduceDesc = "一、推荐系统的介绍,二、大数据介绍及相关环境搭建"
     val recommendIntroduceUrl = "http://" + videoService + "/video/recommend_introduce.mp4"
     val recommendIntroduceImg = "http://a2.qpic.cn/psb?/V10sqCyZ06hzDJ/yfsAI2wh5B4M50pXAg6m5gHEqA8lkkmze1yf9LnzUSw!/b/dKkAAAAAAAAA&bo=IAPFAQAAAAADB8U!&rf=viewer_4"
-    val recomndeIntroduceVideo = Video(recommendIndtroduceName,recommendIntroduceDesc,recommendIntroduceUrl,recommendIntroduceImg)
+    val recomndeIntroduceVideo = Video(recommendIndtroduceName, recommendIntroduceDesc, recommendIntroduceUrl, recommendIntroduceImg)
 
 
-    List(leastSquareVideo,pictureGradienVideo,boltzmannCfVideo,hmmBaumWelchVideo,nativeBayesVideo,emVideo,solrItemcfVideo,recomndeIntroduceVideo)
+    List(leastSquareVideo, pictureGradienVideo, boltzmannCfVideo, hmmBaumWelchVideo, nativeBayesVideo, emVideo, solrItemcfVideo, recomndeIntroduceVideo)
   }
 
 }
 
-case class Video(name: String,descrition:String, url: String,img: String)
+case class Video(name: String, descrition: String, url: String, img: String)
 
 object VMsg {
   implicit val videoMsg = jsonFormat1(VMsg.apply)
@@ -239,20 +241,83 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
                 else Right(defaultRecommendUI.recommendByUserId(userId, number))
               }
           }
-      }~
-    path("mergecloud"){
-      get{
-        ctx: RequestContext =>
-          handleRequest(ctx) {
+      } ~
+      path("mergecloud") {
+        get {
+          ctx: RequestContext =>
+            handleRequest(ctx) {
               Right(new MergeCloud())
-          }
+            }
+        }
+      } ~
+      path("mergeclouds") {
+        get {
+          ctx: RequestContext =>
+            handleRequest(ctx) {
+              val list = new ListBuffer[MergeCloud]()
+              val m1 = new MergeCloud()
+              m1.id = "1003435"
+              m1.isRestrictedArea = 1
+              list += m1
+              val m2 = new MergeCloud()
+              m2.id = "1004254"
+              m2.title = "奔驰轮胎,车主可随叫随到"
+              m2.cityId = "4_5_9_243"
+              m2.isRestrictedArea = 1
+              list += m2
+              val m3 = new MergeCloud()
+              m3.id = "1094454"
+              m3.cityId = "321_34_135_5"
+              m3.isRestrictedArea = 1
+              list += m3
+              val m4 = new MergeCloud()
+              m4.id = "2003435"
+              m4.isRestrictedArea = 1
+              list += m4
+              val m5 = new MergeCloud()
+              m5.id = "2004254"
+              m5.title = "橡胶塑料袋10袋起卖"
+              m5.cityId = "2_3562_42_90"
+              m5.isRestrictedArea = 1
+              list += m5
+              val m6 = new MergeCloud()
+              m6.id = "2094454"
+              m6.cityId = "564"
+              m6.isRestrictedArea = 1
+              list += m6
+
+              val m7 = new MergeCloud()
+              m1.id = "34562234"
+              list += m7
+              val m8 = new MergeCloud()
+              m1.id = "2562234"
+              list += m8
+              val m9 = new MergeCloud()
+              list += m9
+
+              Right(list)
+            }
+        }
+      } ~
+      path("screenclouds") {
+        get {
+          ctx: RequestContext =>
+            handleRequest(ctx) {
+              val list = new ListBuffer[ScreenCloud]()
+              val s1 = new ScreenCloud()
+              list += s1
+              val s2 = new ScreenCloud()
+              s2.id = "1003484_t87_s"
+              s2.catid_s = "1003484"
+              s2.filterId_s = "t87_s"
+              s2.attDescZh_s = "规格"
+              s2.range_s = "0-10|10-20|20-30"
+              list += s2
+              Right(list)
+            }
+        }
       }
-    }
   }
-
-
-
-
 
 
   //implicit def json4sFormats: Formats = DefaultFormats
@@ -421,7 +486,7 @@ println("No files")
 }
 }*/
 
-object test{
+object test {
   def main(args: Array[String]) {
     val fileDir = "/Users/soledede/Documents/images"
     val base64S = "iVBORw0KGgoAAAANSUhEUgAAAH0AAABTCAIAAAA9RJ80AAAAzklEQVR4nO3QQREAIAzAMMC/5+GCPGgU9LpnZuW5owM+1Xej70bfjb4bfTf6bvTd6LvRd6PvRt+Nvht9N/pu9N3ou9F3o+9G342+G303+m703ei70Xej70bfjb4bfTf6bvTd6LvRd6PvRt+Nvht9N/pu9N3ou9F3o+9G342+G303+m703ei70Xej70bfjb4bfTf6bvTd6LvRd6PvRt+Nvht9N/pu9N3ou9F3o+9G342+G303+m703ei70Xej70bfjb4bfTf6bvTd6LvRd+MCXBoDo8Qme9oAAAAASUVORK5CYII="
