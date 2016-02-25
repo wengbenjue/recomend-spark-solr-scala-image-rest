@@ -23,7 +23,7 @@ class SolJSolrCloudClient private extends SolrClient with SLF4JLogging {
     } catch {
       case e: Exception =>
         log.error("search error", e.getCause)
-        server.close()
+        //server.close()
       //TODO Log
     }
     response

@@ -12,7 +12,7 @@ class GeneralRecommendUIImpl extends RecommendUI {
   val solrRecommendCTService = RecommendService("solrCT")
   val solrRecommendMoreLikeThisService  = RecommendService("moreLikeThis")
 
-  val generalUseId = "-007"
+  val generalUseId = "null"
 
   override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
     solrRecommendCFService.recommendByUserId(userId, number)
