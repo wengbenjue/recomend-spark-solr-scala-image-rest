@@ -159,7 +159,7 @@ class SolrRecommendCF private extends RecommendService {
   }
 
   def putToCache(userId: String, number: Int, resultItem: Seq[RecommendResult]) = {
-    cache.put(userId + separator + number, resultItem)
+   cache.put(userId + separator + number, resultItem)
   }
 
   def getFromCache(userId: String, number: Int): scala.Seq[RecommendResult] = {
@@ -314,13 +314,13 @@ object SolrRecommendCF {
 
   def test2() = {
     val s = new SolrRecommendCF()
-    println("$$$$$$$$$$$$$$$$$$$$$$$$" + s.recommendByUserId("23432", 54))
+    //println("$$$$$$$$$$$$$$$$$$$$$$$$" + s.recommendByUserId("23432", 54))
     //s.solrClient.close()
     //Thread.sleep(1000)
     //s.solrClient.connect()
     //Thread.sleep(5000)
-    println("############" + s.recommendByUserId("23432", 54))
-    println(s.recommendByUserId("23433", 2))
+    println("############" + s.recommendByUserId("58438", 54))
+   // println(s.recommendByUserId("58438", 2))
     s.solrClient.close()
   }
 
