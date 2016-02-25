@@ -7,6 +7,7 @@ import scala.reflect.ClassTag
 
 /**
   * Created by soledede on 2015/12/15.
+  * CTRL+ALT+B  find all sub class
   */
 trait SolrClient {
 

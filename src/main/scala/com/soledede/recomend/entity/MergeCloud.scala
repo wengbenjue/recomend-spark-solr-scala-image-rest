@@ -7,6 +7,7 @@ import org.apache.commons.lang.builder.{ToStringStyle, ToStringBuilder}
   */
 class MergeCloud(var id: String = "113567",
                  var sku: String = "MAD443",
+                 var spu: Int = 234,
                  var title: String = "防护口罩",
                  var original: String = "9001",
                  var price: Double = 12345.4,
@@ -47,7 +48,8 @@ class MergeCloud(var id: String = "113567",
                  var isRestrictedArea: Int = 0,
                  var deliveryTime: Float = 5f,
                  var t635_tf: Float = 2.5f,
-                 var t89_s: String = "Honeywell"
+                 var t89_s: String = "Honeywell",
+                 var t87_tf: Double = 24
                 ) extends Serializable {
   override def toString(): String = {
     ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE)
