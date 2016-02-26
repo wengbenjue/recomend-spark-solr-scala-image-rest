@@ -12,24 +12,27 @@ import com.soledede.recomend.dao.HbaseRecommendModel
 import com.soledede.recomend.domain.Failure
 import java.text.{ParseException, SimpleDateFormat}
 import java.util.{Date}
-import com.soledede.recomend.entity.{ScreenCloud, MergeCloud, RecommendResult, Msg}
+import com.soledede.recomend.entity._
 import com.soledede.recomend.file.FileProcessService
 import com.soledede.recomend.imageSearch.ImageSearchService
 import com.soledede.recomend.ui.RecommendUI
-import net.liftweb.json.Serialization._
-import net.liftweb.json.{DefaultFormats, DateFormat, Formats}
-import redis.ByteStringFormatter
+import net.liftweb.json.{DateFormat, Formats}
 import spray.httpx.SprayJsonSupport
-import spray.httpx.marshalling.MetaMarshallers
 import spray.json.DefaultJsonProtocol._
-import scala.Some
 import spray.http._
 import spray.httpx.unmarshalling._
 import spray.routing._
-import spray.http.MediaTypes._
-import spray.http.BodyPart
-import net.liftweb.json._
-import net.liftweb.json.Serialization.{write, read}
+import net.liftweb.json.Serialization._
+import spray.json.DefaultJsonProtocol
+import spray.httpx.unmarshalling._
+import spray.httpx.marshalling._
+import spray.http._
+import HttpCharsets._
+import MediaTypes._
+import spray.httpx.SprayJsonSupport._
+import spray.util._
+import spray.httpx.LiftJsonSupport
+
 
 import scala.collection.mutable.ListBuffer
 
@@ -42,6 +45,12 @@ case class RMsg(result: Seq[String], code: Int)
 
 object RMsg {
   implicit val rmsgFormat = jsonFormat2(RMsg.apply)
+}
+
+case class RecommendParameters(var userId: String,var catagoryId: String,var brandId:String,var number: Int)
+
+object RecommendParameters{
+  implicit val recomPFormat = jsonFormat4(RecommendParameters.apply)
 }
 
 case class VMsg(result: Seq[Video])
@@ -150,6 +159,7 @@ class RestRecommendServiceActor extends Actor with RestService {
 
   //选择推荐还是其他,如图像检索
   def receive = if (openRecommend) runRoute(rest) else runRoute(restRout)
+  //def receive = runRoute(restRout)
 }
 
 /**
@@ -157,6 +167,7 @@ class RestRecommendServiceActor extends Actor with RestService {
   */
 trait RestService extends HttpService with SLF4JLogging with Configuration with spray.httpx.SprayJsonSupport {
 
+  import SprayJsonSupport._
 
   //import RJsonProtocol._
 
@@ -217,6 +228,26 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
     }
   }
 
+
+  /*path("recommend" / "sku") {
+
+       //
+         post {
+           entity(Unmarshaller(MediaTypes.`application/json`) {
+             case httpEntity: HttpEntity =>
+               read[RecommendParameters](httpEntity.asString(HttpCharsets.`UTF-8`))
+           }){
+             parameters: RecommendParameters =>
+               ctx: RequestContext =>
+                 handleRequest(ctx) {
+                   if (parameters.number == null || parameters.number <= 0 || parameters.number > 80)
+                     Right(Msg("推荐数量必须大于0,并且不能超过80个", -1))
+                   else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(parameters.userId, parameters.catagoryId, parameters.brandId, parameters.number))
+                 }
+           }
+         }
+     } ~*/
+
   val rest = respondWithMediaType(MediaTypes.`application/json`) {
     //"res" / Segment 匹配字符串
     //数字 LongNumber
@@ -254,6 +285,21 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
                 else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(userId, catagoryId, brandId, number))
               }
           }
+      } ~
+      path("recommend" / "sku") {
+
+        //
+        post {
+          entity(as[RecommendParameters]){
+            parameters: RecommendParameters =>
+              ctx: RequestContext =>
+                handleRequest(ctx) {
+                  if (parameters.number == null || parameters.number <= 0 || parameters.number > 80)
+                    Right(Msg("推荐数量必须大于0,并且不能超过80个", -1))
+                  else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(parameters.userId, parameters.catagoryId, parameters.brandId, parameters.number))
+                }
+          }
+        }
       } ~
       path("mergecloud") {
         get {
@@ -519,8 +565,30 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
             }
           }
         }
+      } ~
+      path("soledede" / "sku") {
+        detach() {
+          post {
+            respondWithMediaType(MediaTypes.`application/json`) {
+              entity(as[RecommendParameters]) { parameters =>
+                complete {
+                  try {
+                      println(parameters)
+                    RMsg(List(), -1)
+                  } catch {
+                    case e: Exception =>
+                      log.error("faield!", e)
+                      RMsg(List(), -1)
+                  }
+                }
+              }
+
+            }
+          }
+        }
       }
   }
+
 
   lazy val index =
     <html>
