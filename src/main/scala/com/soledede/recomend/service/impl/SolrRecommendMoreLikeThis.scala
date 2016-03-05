@@ -30,7 +30,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     * @return
     */
   override def recommendByDocId(docId: String, number: Int): Seq[RecommendResult] = {
-    val q = s"id:$docId"
+    val q = s"(sku:$docId OR id:$docId)"
     docIdAndCatagoryAndBrandRecommend(docId, number, null, q)
   }
 
