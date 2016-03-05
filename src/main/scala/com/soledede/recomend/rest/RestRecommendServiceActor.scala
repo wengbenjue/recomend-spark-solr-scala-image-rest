@@ -47,10 +47,10 @@ object RMsg {
   implicit val rmsgFormat = jsonFormat2(RMsg.apply)
 }
 
-case class RecommendParameters(var userId: String,var catagoryId: String,var brandId:String,var number: Int)
+case class RecommendParameters(var userId: Option[String],var catagoryId: Option[String],var brandId:Option[String],var docId: Option[String],var number: Int=0)
 
 object RecommendParameters{
-  implicit val recomPFormat = jsonFormat4(RecommendParameters.apply)
+  implicit val recomPFormat = jsonFormat5(RecommendParameters.apply)
 }
 
 case class VMsg(result: Seq[Video])
@@ -274,15 +274,15 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
               }
           }
       } ~
-      path("recommend" / Segment / Segment / Segment / IntNumber) {
+      path("recommend" / Segment / Segment / Segment / Segment / IntNumber) {
         //
-        (userId, catagoryId, brandId, number) =>
+        (userId, catagoryId, brandId, docId,number) =>
           get {
             ctx: RequestContext =>
               handleRequest(ctx) {
                 if (number == null || number <= 0 || number > 80)
                   Right(Msg("推荐数量必须大于0,并且不能超过80个", -1))
-                else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(userId, catagoryId, brandId, number))
+                else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(userId, catagoryId, brandId,docId,number))
               }
           }
       } ~
@@ -296,7 +296,7 @@ trait RestService extends HttpService with SLF4JLogging with Configuration with 
                 handleRequest(ctx) {
                   if (parameters.number == null || parameters.number <= 0 || parameters.number > 80)
                     Right(Msg("推荐数量必须大于0,并且不能超过80个", -1))
-                  else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(parameters.userId, parameters.catagoryId, parameters.brandId, parameters.number))
+                  else Right(defaultRecommendUI.recommendByUserIdOrCatagoryIdOrBrandId(parameters.userId.getOrElse(null), parameters.catagoryId.getOrElse(null), parameters.brandId.getOrElse(null),parameters.docId.getOrElse(null), parameters.number))
                 }
           }
         }

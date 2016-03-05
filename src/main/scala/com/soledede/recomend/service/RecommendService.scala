@@ -7,6 +7,8 @@ import com.soledede.recomend.service.impl.{SolrRecommendMoreLikeThis, SolrRecomm
   * Created by soledede on 2015/12/15.
   */
 trait RecommendService {
+  def recommendByDocId(docId: String, number: Int): Seq[RecommendResult] = null
+
   def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = null
 
   def recommendMostLikeCatagoryIdByKeywords(keywords: String): String = null

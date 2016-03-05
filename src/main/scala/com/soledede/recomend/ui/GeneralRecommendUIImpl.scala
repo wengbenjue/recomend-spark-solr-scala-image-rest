@@ -20,7 +20,7 @@ class GeneralRecommendUIImpl extends RecommendUI {
 
   override def recommendMostLikeCatagoryIdByKeywords(keyword: String): String = solrRecommendCTService.recommendMostLikeCatagoryIdByKeywords(keyword)
 
-  override def recommendByUserIdOrCatagoryIdOrBrandId(userId: String, catagoryId: String, brandId: String, number: Int): Seq[RecommendResult] = {
+  override def recommendByUserIdOrCatagoryIdOrBrandId(userId: String, catagoryId: String, brandId: String,docId: String, number: Int): Seq[RecommendResult] = {
     if (userId != null && !userId.trim.equalsIgnoreCase("") && !userId.trim.equalsIgnoreCase("null")) solrRecommendCFService.recommendByUserId(userId, number)
     else if (catagoryId != null && !catagoryId.trim.equalsIgnoreCase("") && !catagoryId.trim.equalsIgnoreCase("null")) {
       val cRecommends = solrRecommendMoreLikeThisService.recommendByCatagoryId(catagoryId, number)
@@ -30,7 +30,11 @@ class GeneralRecommendUIImpl extends RecommendUI {
       val bRecommends = solrRecommendMoreLikeThisService.recommendByBrandId(brandId, number)
       if (bRecommends == null) solrRecommendCFService.recommendByUserId(generalUseId, number)
       else bRecommends
-    } else solrRecommendCFService.recommendByUserId(generalUseId, number)
+    } else if(docId != null && !docId.trim.equalsIgnoreCase("") && !docId.trim.equalsIgnoreCase("null")){
+      val docIdRecommends = solrRecommendMoreLikeThisService.recommendByDocId(docId, number)
+      if (docIdRecommends == null) solrRecommendCFService.recommendByUserId(generalUseId, number)
+      else docIdRecommends
+    }else solrRecommendCFService.recommendByUserId(generalUseId, number)
   }
 }
 

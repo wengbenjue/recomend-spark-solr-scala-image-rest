@@ -24,14 +24,26 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
 
   /**
     *
+    * recommend by document id
+    * @param docId
+    * @param number
+    * @return
+    */
+  override def recommendByDocId(docId: String, number: Int): Seq[RecommendResult] = {
+    val q = s"id:$docId"
+    docIdAndCatagoryAndBrandRecommend(docId, number, null, q)
+  }
+
+  /**
+    *
     * @param catagoryId
     * @param number
     * @return
     */
   override def recommendByCatagoryId(catagoryId: String, number: Int): Seq[RecommendResult] = {
-
+    val q = "*:*"
     val fq = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
-    catagoryAndBrandRecommend(catagoryId, number, fq)
+    docIdAndCatagoryAndBrandRecommend(catagoryId, number, fq, q)
   }
 
 
@@ -43,17 +55,16 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     */
   override def recommendByBrandId(brandId: String, number: Int): Seq[RecommendResult] = {
     val fq = s"brandId:$brandId"
-    catagoryAndBrandRecommend(brandId, number, fq)
+    val q = "*:*"
+    docIdAndCatagoryAndBrandRecommend(brandId, number, fq, q)
   }
 
-  private def catagoryAndBrandRecommend(id: String, number: Int, fq: String): Seq[RecommendResult] = {
+  private def docIdAndCatagoryAndBrandRecommend(id: String, number: Int, fq: String, q: String): Seq[RecommendResult] = {
     if (id != null && !id.equalsIgnoreCase("")) {
 
       val cacheRecommendResultList = getFromCache(id, number) //get form cache
       if (cacheRecommendResultList != null) cacheRecommendResultList
       else {
-        val q = "*:*"
-
         val fl = "item:sku,weight:score"
 
         val recommendResutList = getMoreLikeThisRecomendResult(q, fq, fl, number)
@@ -82,7 +93,8 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
 
     query.set("qt", "/mlt")
     query.setQuery(q)
-    query.setFilterQueries(fq)
+    if (fq != null && !fq.trim.equalsIgnoreCase("") && !fq.trim.equalsIgnoreCase("null"))
+      query.setFilterQueries(fq)
     query.setFields(fl)
     query.setSort("score", SolrQuery.ORDER.desc)
 
@@ -145,7 +157,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
   }
 }
 
-object SolrRecommendMoreLikeThis{
+object SolrRecommendMoreLikeThis {
   var solrMoreLikeThis: SolrRecommendMoreLikeThis = null
 
   def apply(): SolrRecommendMoreLikeThis = {
