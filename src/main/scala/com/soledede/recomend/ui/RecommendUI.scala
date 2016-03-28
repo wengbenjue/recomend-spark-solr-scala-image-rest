@@ -13,7 +13,9 @@ trait RecommendUI {
 
   def recommendByCatagoryByUser(user: User,number:Int): Seq[String] = null
 
-  def recommendMostLikeCatagoryIdByKeywords(keyword: String): String
+  def recommendMostLikeCatagoryIdByKeywords(keyword: String): String = null
+
+  def recommendByUserIdOrCatagoryIdOrBrandId(userId: String,catagoryId: String,brandId: String,docId: String,number:Int):Seq[RecommendResult] = null
 
 }
 

@@ -35,13 +35,15 @@ class SolrRecommendCF private extends RecommendService {
     var jsonFacet = "{categories:{type:terms,field:docId,limit:80,sort:{weights:desc},facet:{weights:\"sum(weight)\"}}}"
     jsonFacet = jsonFacet.replaceAll(":", "\\:")
     val topNItems = groupBucket(null, fq, jsonFacet)
-    val recommendResult = topNItems.map { kv =>
-      val docId = kv.get("val").toString.trim
-      val weight = kv.get("weights").asInstanceOf[Double]
-      RecommendResult(docId, weight)
-    }
-    SolrRecommendCF.lock.synchronized {
-      SolrRecommendCF.topNItemsList = recommendResult
+    if(topNItems !=null) {
+      val recommendResult = topNItems.map { kv =>
+        val docId = kv.get("val").toString.trim
+        val weight = kv.get("weights").asInstanceOf[Double]
+        RecommendResult(docId, weight)
+      }
+      SolrRecommendCF.lock.synchronized {
+        SolrRecommendCF.topNItemsList = recommendResult
+      }
     }
   }
 
@@ -157,7 +159,7 @@ class SolrRecommendCF private extends RecommendService {
   }
 
   def putToCache(userId: String, number: Int, resultItem: Seq[RecommendResult]) = {
-    cache.put(userId + separator + number, resultItem)
+   cache.put(userId + separator + number, resultItem)
   }
 
   def getFromCache(userId: String, number: Int): scala.Seq[RecommendResult] = {
@@ -210,12 +212,16 @@ class SolrRecommendCF private extends RecommendService {
     query.setParam("json.facet", json_facet)
     query.setRows(0)
     query.setStart(0)
-    val r = solrClient.searchByQuery(query, "solritemcf").asInstanceOf[QueryResponse]
-    val fMap = r.getResponse
-    val facetsMap = fMap.get("facets").asInstanceOf[SimpleOrderedMap[SimpleOrderedMap[java.util.List[SimpleOrderedMap[java.lang.Object]]]]]
-    val catagoryMap = facetsMap.get("categories")
-    val bucketList = catagoryMap.get("buckets")
-    bucketList
+    val rt = solrClient.searchByQuery(query, "solritemcf")
+    if (rt == null) return null
+    else {
+      val r = rt.asInstanceOf[QueryResponse]
+      val fMap = r.getResponse
+      val facetsMap = fMap.get("facets").asInstanceOf[SimpleOrderedMap[SimpleOrderedMap[java.util.List[SimpleOrderedMap[java.lang.Object]]]]]
+      val catagoryMap = facetsMap.get("categories")
+      val bucketList = catagoryMap.get("buckets")
+      bucketList
+    }
   }
 
   def testSearchByQuery() = {
@@ -308,13 +314,13 @@ object SolrRecommendCF {
 
   def test2() = {
     val s = new SolrRecommendCF()
-    println("$$$$$$$$$$$$$$$$$$$$$$$$" + s.recommendByUserId("23432", 54))
+    //println("$$$$$$$$$$$$$$$$$$$$$$$$" + s.recommendByUserId("23432", 54))
     //s.solrClient.close()
     //Thread.sleep(1000)
     //s.solrClient.connect()
     //Thread.sleep(5000)
-    println("############" + s.recommendByUserId("23432", 54))
-    println(s.recommendByUserId("23433", 2))
+    println("############" + s.recommendByUserId("58438", 54))
+   // println(s.recommendByUserId("58438", 2))
     s.solrClient.close()
   }
 

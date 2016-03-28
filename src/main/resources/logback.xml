@@ -20,7 +20,7 @@
         </filter>
         <!-- 可让每天产生一个日志文件，最多 100个，自动回滚 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/data/scala/solr_rest/log/recommend-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/data/recimage/log/recommend-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>100</maxHistory>
         </rollingPolicy>
 

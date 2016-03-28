@@ -4,3 +4,4 @@ target/
 *.iml
 *.class
 *.log
+src/main/resources/application_test.conf
