@@ -2,6 +2,7 @@ package com.soledede.recomend.service.impl
 
 import akka.event.slf4j.SLF4JLogging
 import com.soledede.recomend.cache.KVCache
+import com.soledede.recomend.config.Configuration
 import com.soledede.recomend.entity.RecommendResult
 import com.soledede.recomend.service.RecommendService
 import com.soledede.recomend.solr.SolrClient
@@ -13,7 +14,7 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by soledede on 16/2/25.
   */
-class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLogging {
+class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLogging with Configuration{
 
   val solrClient = SolrClient()
 
@@ -31,7 +32,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     */
   override def recommendByDocId(docId: String, number: Int): Seq[RecommendResult] = {
     val q = s"(sku:$docId OR id:$docId)"
-    docIdAndCatagoryAndBrandRecommend(docId, number, null, q)
+    docIdAndCatagoryAndBrandRecommend(docId, number, q)
   }
 
   /**
@@ -41,9 +42,10 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     * @return
     */
   override def recommendByCatagoryId(catagoryId: String, number: Int): Seq[RecommendResult] = {
-    val q = "*:*"
-    val fq = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
-    docIdAndCatagoryAndBrandRecommend(catagoryId, number, fq, q)
+   // val q = "*:*"
+   // val fq = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
+   val q = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
+    docIdAndCatagoryAndBrandRecommend(catagoryId, number,q)
   }
 
 
@@ -54,12 +56,13 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     * @return
     */
   override def recommendByBrandId(brandId: String, number: Int): Seq[RecommendResult] = {
-    val fq = s"brandId:$brandId"
-    val q = "*:*"
-    docIdAndCatagoryAndBrandRecommend(brandId, number, fq, q)
+    //val fq = s"brandId:$brandId"
+    //val q = "*:*"
+    val q = s"brandId:$brandId"
+    docIdAndCatagoryAndBrandRecommend(brandId, number, q)
   }
 
-  private def docIdAndCatagoryAndBrandRecommend(id: String, number: Int, fq: String, q: String): Seq[RecommendResult] = {
+  private def docIdAndCatagoryAndBrandRecommend(id: String, number: Int,  q: String): Seq[RecommendResult] = {
     if (id != null && !id.equalsIgnoreCase("")) {
 
       val cacheRecommendResultList = getFromCache(id, number) //get form cache
@@ -67,7 +70,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
       else {
         val fl = "item:sku,weight:score"
 
-        val recommendResutList = getMoreLikeThisRecomendResult(q, fq, fl, number)
+        val recommendResutList = getMoreLikeThisRecomendResult(q,null,fl, number)
 
         if (recommendResutList != null) {
           putToCache(id, number, recommendResutList)
@@ -103,7 +106,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     if (number > 0) rows = number
     query.setRows(number)
 
-    val r = solrClient.searchByQuery(query, "mergescloud")
+    val r = solrClient.searchByQuery(query, productCollection)
 
     if (r != null) {
 
@@ -163,5 +166,13 @@ object SolrRecommendMoreLikeThis {
   def apply(): SolrRecommendMoreLikeThis = {
     if (solrMoreLikeThis == null) solrMoreLikeThis = new SolrRecommendMoreLikeThis()
     solrMoreLikeThis
+  }
+}
+
+object testSolrRecommendMoreLikeThis{
+  def main(args: Array[String]) {
+   val moreLikeThis = SolrRecommendMoreLikeThis()
+   val result = moreLikeThis.recommendByBrandId("25",4)
+    println(result)
   }
 }
