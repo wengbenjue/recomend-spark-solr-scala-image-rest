@@ -32,7 +32,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     */
   override def recommendByDocId(docId: String, number: Int): Seq[RecommendResult] = {
     val q = s"(sku:$docId OR id:$docId)"
-    docIdAndCatagoryAndBrandRecommend(docId, number, q)
+    docIdAndCatagoryAndBrandRecommend(docId, number, q,null)
   }
 
   /**
@@ -43,9 +43,9 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     */
   override def recommendByCatagoryId(catagoryId: String, number: Int): Seq[RecommendResult] = {
    // val q = "*:*"
-   // val fq = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
+    val fq = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
    val q = s"(categoryId1:$catagoryId OR categoryId2:$catagoryId OR categoryId3:$catagoryId OR categoryId4:$catagoryId)"
-    docIdAndCatagoryAndBrandRecommend(catagoryId, number,q)
+    docIdAndCatagoryAndBrandRecommend(catagoryId, number,q,fq)
   }
 
 
@@ -56,13 +56,13 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
     * @return
     */
   override def recommendByBrandId(brandId: String, number: Int): Seq[RecommendResult] = {
-    //val fq = s"brandId:$brandId"
+    val fq = s"brandId:$brandId"
     //val q = "*:*"
     val q = s"brandId:$brandId"
-    docIdAndCatagoryAndBrandRecommend(brandId, number, q)
+    docIdAndCatagoryAndBrandRecommend(brandId, number, q,fq)
   }
 
-  private def docIdAndCatagoryAndBrandRecommend(id: String, number: Int,  q: String): Seq[RecommendResult] = {
+  private def docIdAndCatagoryAndBrandRecommend(id: String, number: Int,  q: String,fq: String): Seq[RecommendResult] = {
     if (id != null && !id.equalsIgnoreCase("")) {
 
       val cacheRecommendResultList = getFromCache(id, number) //get form cache
@@ -70,7 +70,7 @@ class SolrRecommendMoreLikeThis private extends RecommendService with SLF4JLoggi
       else {
         val fl = "item:sku,weight:score"
 
-        val recommendResutList = getMoreLikeThisRecomendResult(q,null,fl, number)
+        val recommendResutList = getMoreLikeThisRecomendResult(q,fq,fl, number)
 
         if (recommendResutList != null) {
           putToCache(id, number, recommendResutList)
