@@ -172,7 +172,7 @@ object SolrRecommendMoreLikeThis {
 object testSolrRecommendMoreLikeThis{
   def main(args: Array[String]) {
    val moreLikeThis = SolrRecommendMoreLikeThis()
-   val result = moreLikeThis.recommendByBrandId("25",4)
+   val result = moreLikeThis.recommendByBrandId("2",18)
     println(result)
   }
 }
