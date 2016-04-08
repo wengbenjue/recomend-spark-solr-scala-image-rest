@@ -45,4 +45,18 @@ object GeneralRecommendUIImpl {
     if (generalRecommendUIImpl == null) generalRecommendUIImpl = new GeneralRecommendUIImpl()
     generalRecommendUIImpl
   }
+
+  def main(args: Array[String]) {
+    testRecommendByUserId
+  }
+
+
+
+  def testRecommendByUserId() = {
+    val recomendUI = GeneralRecommendUIImpl()
+  val result =   recomendUI.recommendByUserId("432",20)
+    println(result.toString())
+  }
+
+
 }

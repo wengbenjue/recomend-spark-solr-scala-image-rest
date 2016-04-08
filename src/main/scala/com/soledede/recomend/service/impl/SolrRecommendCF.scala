@@ -2,6 +2,7 @@ package com.soledede.recomend.service.impl
 
 
 import com.soledede.recomend.clock.{Timing, SystemTimerClock}
+import com.soledede.recomend.config.Configuration
 import com.soledede.recomend.entity.RecommendResult
 import com.soledede.recomend.service.RecommendService
 import com.soledede.recomend.solr.SolrClient
@@ -17,7 +18,7 @@ import com.soledede.recomend.cache.KVCache
 /**
   * Created by soledede on 2015/12/15.
   */
-class SolrRecommendCF private extends RecommendService {
+class SolrRecommendCF private extends RecommendService with Configuration {
   val solrClient = SolrClient()
 
   val separator = "_$$_"
@@ -29,13 +30,15 @@ class SolrRecommendCF private extends RecommendService {
   val timer = new Timing(new SystemTimerClock(), period, asyncTopN2Cache, "asyncTop2CACHE")
   timer.start()
 
+  val productQuery = new SolrQuery()
+
 
   private def asyncTopN2Cache(): Unit = {
     val fq = "status:99"
-    var jsonFacet = "{categories:{type:terms,field:docId,limit:80,sort:{weights:desc},facet:{weights:\"sum(weight)\"}}}"
+    var jsonFacet = "{categories:{type:terms,field:docId,limit:160,sort:{weights:desc},facet:{weights:\"sum(weight)\"}}}"
     jsonFacet = jsonFacet.replaceAll(":", "\\:")
     val topNItems = groupBucket(null, fq, jsonFacet)
-    if(topNItems !=null) {
+    if (topNItems != null) {
       val recommendResult = topNItems.map { kv =>
         val docId = kv.get("val").toString.trim
         val weight = kv.get("weights").asInstanceOf[Double]
@@ -159,7 +162,7 @@ class SolrRecommendCF private extends RecommendService {
   }
 
   def putToCache(userId: String, number: Int, resultItem: Seq[RecommendResult]) = {
-   cache.put(userId + separator + number, resultItem)
+    cache.put(userId + separator + number, resultItem)
   }
 
   def getFromCache(userId: String, number: Int): scala.Seq[RecommendResult] = {
@@ -167,6 +170,36 @@ class SolrRecommendCF private extends RecommendService {
   }
 
   override def recommendByUserId(userId: String, number: Int): Seq[RecommendResult] = {
+    //get result by solr
+    val resultRecommend = recommendBySolrAndCacheByUserId(userId, number * 2)
+
+    //filter recommend result by search,whether it's in there by solr collection,such as "mergescloud"
+
+    filterRecommendResultByIdFromSolr(resultRecommend, number)
+  }
+
+
+  private def filterRecommendResultByIdFromSolr(recommendResult: Seq[RecommendResult], number: Int): Seq[RecommendResult] = {
+    if (recommendResult != null && recommendResult.size > 0) {
+      val filterRecommendResult = recommendResult.filter(isExistByDocId(_))
+      if (filterRecommendResult != null && filterRecommendResult.size > 0) {
+        if (filterRecommendResult.size <= number) return filterRecommendResult
+        else filterRecommendResult.take(number)
+      } else null
+
+    } else null
+  }
+
+  //whether the doc exist in solr product collection
+  private def isExistByDocId(recommendResult: RecommendResult): Boolean = {
+    val sku = recommendResult.item
+    val fq = s"sku:$sku"
+    val count = SolrRecommendCF.foundNumInDocs(productCollection, null, productQuery, fq)
+    if (count > 0) true
+    else false
+  }
+
+  private def recommendBySolrAndCacheByUserId(userId: String, number: Int): Seq[RecommendResult] = {
     //get result from cache if there is result
     val itemResult = getFromCache(userId: String, number: Int)
     if (itemResult != null && itemResult.size > 0) return itemResult
@@ -308,6 +341,34 @@ object SolrRecommendCF {
 
   var topNItemsList: Seq[RecommendResult] = null
 
+  val solrClient = SolrClient()
+
+  def foundNumInDocs(collection: String, keyword: String, query: SolrQuery, fq: String): Int = {
+    var keyWordsModels: String = "*:*"
+
+    if (keyword != null) {
+      keyWordsModels = keyword.trim.toLowerCase
+    }
+    if (fq != null && !fq.trim.equalsIgnoreCase("")) {
+      query.setFilterQueries(fq)
+    }
+    query.set("qt", "/select")
+    query.setQuery(keyWordsModels)
+    query.setRows(0)
+    val r = solrClient.searchByQuery(query, collection)
+    var result: QueryResponse = null
+    if (r != null) result = r.asInstanceOf[QueryResponse]
+    if (result != null) {
+      val resultDocs = result.getResults
+      if (resultDocs != null && resultDocs.size() > 0) {
+        val numfound = resultDocs.getNumFound
+        numfound.toInt
+      }
+      else 0
+    } else 0
+  }
+
+
   def main(args: Array[String]): Unit = {
     test2()
   }
@@ -320,7 +381,7 @@ object SolrRecommendCF {
     //s.solrClient.connect()
     //Thread.sleep(5000)
     println("############" + s.recommendByUserId("58438", 54))
-   // println(s.recommendByUserId("58438", 2))
+    // println(s.recommendByUserId("58438", 2))
     s.solrClient.close()
   }
 
